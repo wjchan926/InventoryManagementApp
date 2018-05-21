@@ -23,6 +23,7 @@ namespace InventoryManagementApp
         public MainWindow()
         {
             InitializeComponent();
+            this.Title = "Inventory Management";
         }
     }
 }
