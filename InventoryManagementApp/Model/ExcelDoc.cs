@@ -9,7 +9,7 @@ using System.Collections;
 using System.Diagnostics;
 using System.Data;
 
-namespace InventoryManagementApp
+namespace InventoryManagementApp.Model
 {
     class ExcelDoc : IDisposable
     {
@@ -86,7 +86,7 @@ namespace InventoryManagementApp
             }
             catch (Exception e)
             {
-                // Other problems
+                // Other problemsW
                 Console.WriteLine(e.Message);
                 throw;
             }
@@ -106,7 +106,7 @@ namespace InventoryManagementApp
             Marshal.ReleaseComObject(lastCellUsed);
             Marshal.ReleaseComObject(lastCell);
 
-            myRange = mySheet.Range["A2", ExcelColumn.maxStockRev + lastUsedRow];
+            myRange = mySheet.Range["A2", "A" + lastUsedRow];
         }
         
         /// <summary>
@@ -146,17 +146,15 @@ namespace InventoryManagementApp
         public void Write(object writeOb)
         {
             DataTable minMaxDt = (DataTable)writeOb;
-
-            foreach (KeyValuePair<string, int> kvp in partNumList)
+            
+            foreach (DataRow row in minMaxDt.Rows)
             {
-                
-                mySheet.Cells[kvp.Value, ExcelColumn.min] = minMaxDt.Rows.Find(kvp.Key)["Min"];
-                mySheet.Cells[kvp.Value, ExcelColumn.max] = minMaxDt.Rows.Find(kvp.Key)["Max"];
-                mySheet.Cells[kvp.Value, ExcelColumn.onHand] = minMaxDt.Rows.Find(kvp.Key)["QtyOnHand"];
-                mySheet.Cells[kvp.Value, ExcelColumn.avgSalePrice] = minMaxDt.Rows.Find(kvp.Key)["AvgSalePrice"];
-                mySheet.Cells[kvp.Value, ExcelColumn.quantitySold] = minMaxDt.Rows.Find(kvp.Key)["Last15Months"];
-                mySheet.Cells[kvp.Value, ExcelColumn.maxStockRev] = minMaxDt.Rows.Find(kvp.Key)["MaxStockRev"];
-                //                ConsoleWriter.WriteLine(kvp.Key + " Data Written.");           
+                mySheet.Cells[partNumList[row["PartNumber"].ToString()], ExcelColumn.min] = row["Min"];
+                mySheet.Cells[partNumList[row["PartNumber"].ToString()], ExcelColumn.max] = row["Max"];
+                mySheet.Cells[partNumList[row["PartNumber"].ToString()], ExcelColumn.onHand] = row["QtyOnHand"];
+                mySheet.Cells[partNumList[row["PartNumber"].ToString()], ExcelColumn.avgSalePrice] = row["AvgSalePrice"];
+                mySheet.Cells[partNumList[row["PartNumber"].ToString()], ExcelColumn.quantitySold] = row["Last15Months"];
+                mySheet.Cells[partNumList[row["PartNumber"].ToString()], ExcelColumn.maxStockRev] = row["MaxStockRev"];
             }
         }   
         

@@ -5,18 +5,18 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Data;
 
-namespace InventoryManagementApp
+namespace InventoryManagementApp.Model
 {
     static class DataTableExt
     {
-        public static DataTable BuildTable(this DataTable minMaxDt, QuickBooksDataTable salesOrderDataTable, QuickBooksDataTable itemDataTable, Dictionary<string, int> partNumList)
+        public static DataTable BuildTable(this DataTable minMaxDt, IQuickBooksData salesOrderDataTable, IQuickBooksData itemDataTable, Dictionary<string, int> partNumList)
         {
             DataTable dt = new DataTable();
             DateTime startDate = DateTime.Today.AddMonths(-15); // Rolling 15 months
 
             var minMaxGroup =
-                    from item in itemDataTable.AsEnumerable()
-                    join so in salesOrderDataTable.AsEnumerable()
+                    from item in ((QuickBooksDataTable)itemDataTable).AsEnumerable()
+                    join so in ((QuickBooksDataTable)salesOrderDataTable).AsEnumerable()
                     on item.Field<string>("PartNumber") equals so.Field<string>("PartNumber")
                     where partNumList.Keys.Contains(item.Field<string>("PartNumber")) && so.Field<DateTime>("ShipDate") >= startDate
                     group so by new
@@ -40,7 +40,7 @@ namespace InventoryManagementApp
 
             return dt;
         }
-
+        
         public static void Write(this DataTable dataTable, string filepath)
         {
             // Read table, while there is still a record

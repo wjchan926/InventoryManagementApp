@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace InventoryManagementApp
+namespace InventoryManagementApp.Model
 {
     public class ObjectShredder<T>
     {

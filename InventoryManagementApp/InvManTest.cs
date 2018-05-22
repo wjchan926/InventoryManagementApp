@@ -7,6 +7,7 @@ using NUnit.Framework;
 using System.Collections;
 using System.Threading;
 using System.Data;
+using InventoryManagementApp.Model;
 
 namespace InventoryManagementApp
 {
@@ -36,7 +37,7 @@ namespace InventoryManagementApp
                 sb.AppendLine(kvp.Key + " " + kvp.Value);
             }
 
-            System.IO.File.WriteAllText(@"\\msw-fp1\user$\wchan\Documents\Visual Studio 2015\Projects\InventoryManagement\InventoryManagement\bin\Debug\Test\Part Numbers.txt", sb.ToString());
+            System.IO.File.WriteAllText(@"\\msw-fp1\user$\wchan\Documents\Visual Studio 2015\Projects\InventoryManagement\InventoryManagementApp\bin\Debug\Test\Part Numbers.txt", sb.ToString());
 
         } 
         
@@ -46,7 +47,7 @@ namespace InventoryManagementApp
             QuickBooksDataTable itemTable = new ItemDataTable();
             itemTable.BuildTable();
 
-            itemTable.Write(@"\\msw-fp1\user$\wchan\Documents\Visual Studio 2015\Projects\InventoryManagement\InventoryManagement\bin\Debug\Test\PolyItem.csv");
+            itemTable.Write(@"\\msw-fp1\user$\wchan\Documents\Visual Studio 2015\Projects\InventoryManagement\InventoryManagementApp\bin\Debug\Test\PolyItem.csv");
         }
 
         [Test]
@@ -55,7 +56,7 @@ namespace InventoryManagementApp
             QuickBooksDataTable soTable = new SODataTable();
             soTable.BuildTable();
 
-            soTable.Write(@"\\msw-fp1\user$\wchan\Documents\Visual Studio 2015\Projects\InventoryManagement\InventoryManagement\bin\Debug\Test\PolySO.csv");
+            soTable.Write(@"\\msw-fp1\user$\wchan\Documents\Visual Studio 2015\Projects\InventoryManagement\InventoryManagementApp\bin\Debug\Test\PolySO.csv");
         }
 
         [Test]
@@ -74,15 +75,15 @@ namespace InventoryManagementApp
 
                 DataTable minMaxDt = new DataTable().BuildTable(soTable, itemTable, excelDoc.partNumList);
               
-                minMaxDt.Write(@"\\msw-fp1\user$\wchan\Documents\Visual Studio 2015\Projects\InventoryManagement\InventoryManagement\bin\Debug\Test\PolyMinMax.csv");
+                minMaxDt.Write(@"\\msw-fp1\user$\wchan\Documents\Visual Studio 2015\Projects\InventoryManagementApp\InventoryManagementApp\bin\Debug\Test\PolyMinMax.csv");
             }            
         }
 
         [Test]
         public void ExcelWriteTest()
         {
-            QuickBooksDataTable itemTable = new ItemDataTable();
-            QuickBooksDataTable soTable = new SODataTable();
+            IQuickBooksData itemTable = new ItemDataTable();
+            IQuickBooksData soTable = new SODataTable();
             itemTable.BuildTable();
             soTable.BuildTable();
 
@@ -93,7 +94,7 @@ namespace InventoryManagementApp
    
                 DataTable minMaxDt = new DataTable().BuildTable(soTable, itemTable, excelDoc.partNumList);
 
-                minMaxDt.Write(@"\\msw-fp1\user$\wchan\Documents\Visual Studio 2015\Projects\InventoryManagement\InventoryManagement\bin\Debug\Test\PolyMinMax.csv");
+                minMaxDt.Write(@"\\msw-fp1\user$\wchan\Documents\Visual Studio 2015\Projects\InventoryManagementApp\InventoryManagementApp\bin\Debug\Test\PolyMinMax.csv");
 
                 excelDoc.Write(minMaxDt);
             }

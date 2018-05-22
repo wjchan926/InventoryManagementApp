@@ -5,12 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Data;
 using System.Data.Odbc;
+using System.Collections;
 
-namespace InventoryManagementApp
+namespace InventoryManagementApp.Model
 {
-    sealed class SODataTable : QuickBooksDataTable
+    sealed class SODataTable : QuickBooksDataTable, IQuickBooksData
     {       
-        public override string sqlCmdStr
+        protected override string sqlCmdStr
         {
             get
             {
@@ -19,7 +20,7 @@ namespace InventoryManagementApp
                            "WHERE (SalesOrderLine.SalesOrderLineItemRefFullName IS NOT NULL) AND (SalesOrderLine.ShipDate IS NOT NULL) AND (SalesOrderLine.SalesOrderLineQuantity IS NOT NULL) AND (SalesOrderLine.SalesOrderLineRate > 0)";
             }
         }
-                
+        
         protected override sealed void FillError(object sender, FillErrorEventArgs args)
         {
             // Code to handle precision loss.  
@@ -43,5 +44,6 @@ namespace InventoryManagementApp
 
             args.Continue = true;
         }
+
     }
 }

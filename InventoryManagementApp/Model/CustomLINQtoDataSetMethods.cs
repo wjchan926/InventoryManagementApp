@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Data;
 
-namespace InventoryManagementApp
+namespace InventoryManagementApp.Model
 {
     /// <summary>
     /// Used for the CopyDataTable() for SQL statements that include things like LEFT OUTER JOIN

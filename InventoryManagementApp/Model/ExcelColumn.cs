@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace InventoryManagementApp
+namespace InventoryManagementApp.Model
 {
     /// <summary>
     /// Struct that represents the mapping of the columns in Excel Inventory Management Doc

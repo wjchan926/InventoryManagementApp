@@ -1,14 +1,15 @@
 ﻿using InventoryManagementApp;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace InventoryManagementApp
+namespace InventoryManagementApp.ViewModel
 {
-    static class ConsoleWriter
+    class ConsoleWriter
     {
         //private static Control textbox;
         //private static MenuForm menuForm;
@@ -48,5 +49,6 @@ namespace InventoryManagementApp
         //    textbox.Text += value;
         //}
 
+       
     }
 }

@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 using System.Data;
 using System.Data.Odbc;
 
-namespace InventoryManagementApp
+namespace InventoryManagementApp.Model
 {
-    abstract class QuickBooksDataTable : DataTable
+    abstract class QuickBooksDataTable : DataTable, IQuickBooksData
     {
-        public abstract string sqlCmdStr { get; }
+        protected abstract string sqlCmdStr { get; }
               
         public void BuildTable()
         {

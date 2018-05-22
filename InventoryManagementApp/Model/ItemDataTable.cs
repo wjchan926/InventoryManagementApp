@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 using System.Data;
 using System.Data.Odbc;
 
-namespace InventoryManagementApp
+namespace InventoryManagementApp.Model
 {
-    sealed class ItemDataTable : QuickBooksDataTable
+    sealed class ItemDataTable : QuickBooksDataTable, IQuickBooksData
     {               
-        public override string sqlCmdStr
+        protected override string sqlCmdStr
         {
             get
             {
