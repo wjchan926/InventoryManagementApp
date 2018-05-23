@@ -18,7 +18,7 @@ namespace InventoryManagementApp.Model
         public Excel.Workbooks myBooks { get; private set; }
         public Excel.Worksheet mySheet { get; private set; }
         public Excel.Range myRange { get; private set; }
-        public readonly string minMaxPath = @"\\msw-fp1\shared\DG Inventory Management.xlsx";
+        public readonly string minMaxPath = @"\\MSW-FP1\Shared\DG Inventory Management.xlsx";
         public Dictionary<string, int> partNumList { get; private set; }
         
         /// <summary>

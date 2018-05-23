@@ -9,46 +9,52 @@ using System.Threading.Tasks;
 
 namespace InventoryManagementApp.ViewModel
 {
-    class ConsoleWriter
+    public sealed class ConsoleWriter : INotifyPropertyChanged
     {
-        //private static Control textbox;
-        //private static MenuForm menuForm;
+        private static string output;
+        
+        public string Output
+        {
+            get
+            {
+                return output;
+            }
+            set
+            {
+                output = value;
+                OnPropertyChanged("Output");
+            }
+        }
+        
+        public event PropertyChangedEventHandler PropertyChanged;
 
-        //public static void setTextBox(Control outputTb)
-        //{
-        //    textbox = outputTb;
-        //}
+        public ConsoleWriter()
+        {
+            output = "Inventory Management Tool Started.\nPlease ensure QuickBooks is open and logged in.\n";
+            OnPropertyChanged("Output");
+        }
 
-        //public static void setGUI(MenuForm GUI)
-        //{
-        //    menuForm = GUI;
-        //}
+        private void OnPropertyChanged(string propertyName)
+        {
+            // PropertyChanged?.Invoke(null, new PropertyChangedEventArgs(propertyName));
 
-        //public static void WriteLine(string value)
-        //{
-        //    StringBuilder sb = new StringBuilder();
-        //    sb.Append(textbox.Text);
-        //    sb.Append(value);
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (handler != null)
+            {
+                handler(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
 
-        //    if (menuForm.InvokeRequired)
-        //    {
-        //        menuForm.Invoke(new Action<string>(WriteLine), new object[] { value });
-        //        return;
-        //    }
+        public void WriteLine(string value)
+        {
+            output = output + value + "\n";
+            OnPropertyChanged("Output");
+        }
 
-        //    textbox.Text = sb.ToString() + Environment.NewLine;
-        //}
-
-        //public static void AppendTextBox(string value)
-        //{
-        //    if (menuForm.InvokeRequired)
-        //    {
-        //        menuForm.Invoke(new Action<string>(AppendTextBox), new object[] { value });
-        //        return;
-        //    }
-        //    textbox.Text += value;
-        //}
-
-       
+        public void Clear()
+        {
+            output = string.Empty;
+            OnPropertyChanged("Output");
+        }        
     }
 }
