@@ -19,7 +19,7 @@ namespace InventoryManagementApp.Model
         public Excel.Worksheet mySheet { get; private set; }
         public Excel.Range myRange { get; private set; }
         public readonly string minMaxPath = @"\\MSW-FP1\Shared\DG Inventory Management.xlsx";
-        public Dictionary<string, int> partNumList { get; private set; }
+        public Dictionary<string, ExcelPartNumber> partNumList { get; private set; }
         
         /// <summary>
         /// Default Constructor for the Excel Doc class
@@ -31,7 +31,7 @@ namespace InventoryManagementApp.Model
             myBook = null;
             mySheet = null;
             myRange = null;
-            partNumList = new Dictionary<string, int>();
+            partNumList = new Dictionary<string, ExcelPartNumber>();
         }
 
         /// <summary>
@@ -62,7 +62,8 @@ namespace InventoryManagementApp.Model
             myApp.DisplayAlerts = false;            // Hide alerts
 
             // Set the objects to corresponding excel objects
-            SetExcelObjects(); 
+            SetExcelObjects();
+            Log.WriteLine("Min-Max Document Opened.");
         }
         
         /// <summary>
@@ -90,6 +91,7 @@ namespace InventoryManagementApp.Model
                 Console.WriteLine(e.Message);
                 throw;
             }
+            Log.WriteLine("Excel Objects Set.");
         }
 
         /// <summary>
@@ -106,7 +108,7 @@ namespace InventoryManagementApp.Model
             Marshal.ReleaseComObject(lastCellUsed);
             Marshal.ReleaseComObject(lastCell);
 
-            myRange = mySheet.Range["A2", "A" + lastUsedRow];
+            myRange = mySheet.Range[ExcelColumn.partNumber + "2", ExcelColumn.restockSODate + lastUsedRow + ""];          
         }
         
         /// <summary>
@@ -121,26 +123,33 @@ namespace InventoryManagementApp.Model
                 myBooks.Close();
                 myApp.Quit();
                 myApp.DisplayAlerts = true;
-                Console.WriteLine("Excel Closed.");
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);    
             }
+            Log.WriteLine("Min-Max Document Saved and Closed.");
         }
                          
         /// <summary>
         /// Gets all the part numbers from the excel spreasheet
         /// </summary>
         public void InStreamData()
-        { 
+        {
+            setRange();
+
             foreach (Excel.Range row in myRange.Rows)
             {
-                dynamic value = row.Value2;
+                object value = myRange[row.Row-1, ExcelColumn.partNumber].Value2;
                 string convertedPartNumber = Convert.ToString(value);
-                partNumList.Add(convertedPartNumber, row.Row);
+                //     partNumList.Add(convertedPartNumber, row.Row);
+                dynamic soNumVal = myRange[row.Row-1, ExcelColumn.restockSONum].Value2;
+                string conSoNumVal = Convert.ToString(soNumVal);
+                dynamic soDateVal = myRange[row.Row-1, ExcelColumn.restockSODate].Value2;
+                string conSoDateVal = Convert.ToString(soDateVal);
+                partNumList.Add(convertedPartNumber, new ExcelPartNumber(row.Row-1, conSoNumVal, conSoDateVal));
             }
-            Console.WriteLine(partNumList.Count + " Entries Found.");       
+            Log.WriteLine(partNumList.Count + " Entries Found.");       
         }
 
         public void Write(object writeOb)
@@ -148,14 +157,19 @@ namespace InventoryManagementApp.Model
             DataTable minMaxDt = (DataTable)writeOb;
             
             foreach (DataRow row in minMaxDt.Rows)
-            {
-                mySheet.Cells[partNumList[row["PartNumber"].ToString()], ExcelColumn.min] = row["Min"];
-                mySheet.Cells[partNumList[row["PartNumber"].ToString()], ExcelColumn.max] = row["Max"];
-                mySheet.Cells[partNumList[row["PartNumber"].ToString()], ExcelColumn.onHand] = row["QtyOnHand"];
-                mySheet.Cells[partNumList[row["PartNumber"].ToString()], ExcelColumn.avgSalePrice] = row["AvgSalePrice"];
-                mySheet.Cells[partNumList[row["PartNumber"].ToString()], ExcelColumn.quantitySold] = row["Last15Months"];
-                mySheet.Cells[partNumList[row["PartNumber"].ToString()], ExcelColumn.maxStockRev] = row["MaxStockRev"];
+            {                
+                myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.min] = row["Min"];
+                myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.max] = row["Max"];
+                myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.onHand] = row["QtyOnHand"];
+                myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.avgSalePrice] = String.Format("{0:C}", row["AvgSalePrice"]);
+                myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.quantitySold] = row["Last15Months"];
+                myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.maxStockRev] = String.Format("{0:C}", row["MaxStockRev"]);
+                myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.restockSONum] = row["RestockSONum"];
+                myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.restockSODate] = row["RestockSODate"];
+                Log.WriteLine(row["PartNumber"].ToString() + " Analyzed");
             }
+
+            Log.WriteLine("Analysis Complete.");
         }   
         
         public void Dispose()
@@ -174,5 +188,21 @@ namespace InventoryManagementApp.Model
                 Console.WriteLine("Release Failed:\n" + e.Message);
             }
         }
+
     }
+
+    class ExcelPartNumber
+    {
+        public int rowNum;
+        public string restockSONum;
+        public string restockSODate;
+
+        public ExcelPartNumber(int rowNum, string restockSONum, string restockSODate)
+        {
+            this.rowNum = rowNum;
+            this.restockSONum = restockSONum;
+            this.restockSODate = restockSODate;
+        }
+    }
+
 }

@@ -8,7 +8,7 @@ using System.Data;
 
 namespace InventoryManagementApp.ViewModel
 {
-    class ExcelDocViewModel
+    sealed class ExcelDocViewModel
     {
         public ExcelDoc excelDoc { get; private set; }
 
@@ -27,8 +27,10 @@ namespace InventoryManagementApp.ViewModel
             excelDoc.Close();
         }
 
-        public void Analyze(IQuickBooksData itemDataTable, IQuickBooksData salesOrderDataTable)
+        public DataTable Analyze(IQuickBooksData itemDataTable, IQuickBooksData salesOrderDataTable)
         {
+            excelDoc.SetExcelObjects();
+
             excelDoc.InStreamData();
             itemDataTable.BuildTable();
             salesOrderDataTable.BuildTable();
@@ -36,6 +38,8 @@ namespace InventoryManagementApp.ViewModel
             DataTable minMaxDt = new DataTable().BuildTable(salesOrderDataTable, itemDataTable, excelDoc.partNumList);
 
             excelDoc.Write(minMaxDt);
+
+            return minMaxDt;
         }
 
     }

@@ -16,6 +16,7 @@ using InventoryManagementApp.ViewModel;
 using System.Deployment.Application;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Data;
 
 namespace InventoryManagementApp.View
 {
@@ -25,7 +26,8 @@ namespace InventoryManagementApp.View
     public partial class MainWindow : Window
     {
         ExcelDocViewModel excelDocViewModel;
-        ConsoleWriter consoleWriter;
+        LogViewModel logViewModel;
+        SOReqViewModel soReqViewModel;
 
         private string version;
         
@@ -40,26 +42,31 @@ namespace InventoryManagementApp.View
             Title = "Inventory Mangement Tool V" + version;
             Topmost = true;
 
-            consoleWriter = new ConsoleWriter();
+            logViewModel = new LogViewModel();
 
             outputTb.SetBinding(TextBox.TextProperty, new Binding("Output")
             {
-                Source = consoleWriter,
+                Source = logViewModel,
                 Mode = BindingMode.OneWay
             });
-        }
-        
+        }        
 
         private void openBtn_Click(object sender, RoutedEventArgs e)
         {
             excelDocViewModel = new ExcelDocViewModel();
             excelDocViewModel.Open();
-            consoleWriter.WriteLine("Min-Max Document Opened.");
+
+            logViewModel.UpdateStatus();
+            outputTb.ScrollToEnd();
         }
 
         private void analyzeBtn_Click(object sender, RoutedEventArgs e)
         {
-            consoleWriter.WriteLine("...Analyzing Part Numbers...");
+            Log.WriteLine("...Analyzing Part Numbers...");
+
+            logViewModel.UpdateStatus();
+            outputTb.ScrollToEnd();
+
             openBtn.IsEnabled = false;
             analyzeBtn.IsEnabled = false;
             saveCloseBtn.IsEnabled = false;
@@ -67,9 +74,18 @@ namespace InventoryManagementApp.View
 
             SOTableViewModel soTableViewModel = new SOTableViewModel();
             ItemTableViewModel itemTableViewModel = new ItemTableViewModel();
-            excelDocViewModel.Analyze(itemTableViewModel.itemDataTable, soTableViewModel.soDataTable);
+            DataTable minMaxDt = excelDocViewModel.Analyze(itemTableViewModel.itemDataTable, soTableViewModel.soDataTable);
 
-            consoleWriter.WriteLine("Analysis Complete.\nPlease Refer to Min-Max Document.");
+            soReqViewModel = new SOReqViewModel(minMaxDt);
+
+            soReqDataGrid.SetBinding(DataGrid.ItemsSourceProperty, new Binding("SOReqDataTable")
+            {
+                Source = soReqViewModel,
+                Mode = BindingMode.TwoWay
+            });
+
+            logViewModel.UpdateStatus();
+            outputTb.ScrollToEnd();
 
             openBtn.IsEnabled = true;
             analyzeBtn.IsEnabled = true;
@@ -82,9 +98,10 @@ namespace InventoryManagementApp.View
             using (excelDocViewModel.excelDoc)
             {
                 excelDocViewModel.excelDoc.Close();
-                consoleWriter.WriteLine("Min-Max Document Saved and Closed.");
-            }
 
+                logViewModel.UpdateStatus();
+                outputTb.ScrollToEnd();
+            }
         }
 
         private void exitBtn_Click(object sender, RoutedEventArgs e)
@@ -98,14 +115,12 @@ namespace InventoryManagementApp.View
             this.Close();
         }
 
-        private void outputTb_TextChanged(object sender, TextChangedEventArgs e)
-        {
-
-        }
-
         private void clearBtn_Click(object sender, RoutedEventArgs e)
         {
-            consoleWriter.Clear();   
+            Log.Clear();
+
+            logViewModel.UpdateStatus();
+            outputTb.ScrollToEnd();
         }
     }
 }

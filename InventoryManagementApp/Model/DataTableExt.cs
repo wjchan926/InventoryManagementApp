@@ -9,7 +9,7 @@ namespace InventoryManagementApp.Model
 {
     static class DataTableExt
     {
-        public static DataTable BuildTable(this DataTable minMaxDt, IQuickBooksData salesOrderDataTable, IQuickBooksData itemDataTable, Dictionary<string, int> partNumList)
+        public static DataTable BuildTable(this DataTable minMaxDt, IQuickBooksData salesOrderDataTable, IQuickBooksData itemDataTable, Dictionary<string, ExcelPartNumber> partNumList)
         {
             DataTable dt = new DataTable();
             DateTime startDate = DateTime.Today.AddMonths(-15); // Rolling 15 months
@@ -21,26 +21,52 @@ namespace InventoryManagementApp.Model
                     where partNumList.Keys.Contains(item.Field<string>("PartNumber")) && so.Field<DateTime>("ShipDate") >= startDate
                     group so by new
                     {
+                        Row = partNumList[item.Field<string>("PartNumber")].rowNum,
                         PartNumber = item.Field<string>("PartNumber"),
-                        QtyOnHand = item.Field<decimal>("QtyOnHand")
+                        QtyOnHand = (int)item.Field<decimal>("QtyOnHand"),
+                        RestockSONum = partNumList[item.Field<string>("PartNumber")].restockSONum,
+                        RestockSODate = partNumList[item.Field<string>("PartNumber")].restockSODate
                     } into itemGroup
                     select new
                     {
+                        Row = itemGroup.Key.Row + 1,
                         PartNumber = itemGroup.Key.PartNumber,
-                        QtyOnHand = itemGroup.Key.QtyOnHand,
                         Min = (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 1.5m / 15.0m),
-                        Max = (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 3m / 15m),
+                        Max = (int)((itemGroup.Average(so => so.Field<decimal>("SalePrice")) * (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 3m / 15m))) > 1000 ? 
+                            (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 3m / 15m) : 
+                            (int)(1000m / itemGroup.Average(so => so.Field<decimal>("SalePrice"))),
+                        QtyOnHand = itemGroup.Key.QtyOnHand,
+                        AvgSalePrice = Math.Round(itemGroup.Average(so => so.Field<decimal>("SalePrice")), 2),
                         Last15Months = (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity"))),
-                        AvgSalePrice = itemGroup.Average(so => so.Field<decimal>("SalePrice")),
-                        MaxStockRev = (int)(itemGroup.Average(so => so.Field<decimal>("SalePrice")) * (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 3m / 15m)),
+                        MaxStockRev = (int)((itemGroup.Average(so => so.Field<decimal>("SalePrice")) * (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 3m / 15m))) > 1000 ?
+                            (int)((itemGroup.Average(so => so.Field<decimal>("SalePrice")) * (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 3m / 15m))) :
+                            (int)((1000m / itemGroup.Average(so => so.Field<decimal>("SalePrice"))) * (itemGroup.Average(so => so.Field<decimal>("SalePrice")))),
+                        RestockSONum = itemGroup.Key.RestockSONum,
+                        RestockSODate = itemGroup.Key.RestockSODate
                     };
 
-            dt = minMaxGroup.CopyToDataTable();
+            dt = minMaxGroup.CustomCopyToDataTable();
             dt.PrimaryKey = new DataColumn[] { dt.Columns["PartNumber"] };
 
             return dt;
         }
-        
+
+        public static DataTable BuildSOReqTable(this DataTable soReqTable, DataTable minMaxDt)
+        {
+            DataTable dt = new DataTable();
+ 
+            IEnumerable<DataRow> minMaxRows =
+                    from item in minMaxDt.AsEnumerable()
+                    where (item.Field<int>("QtyOnHand") < item.Field<int>("Min")) && string.IsNullOrEmpty(item.Field<string>("RestockSONum"))
+                    orderby item["Row"] ascending
+                    select item;
+
+            dt = minMaxRows.CopyToDataTable<DataRow>();
+            dt.PrimaryKey = new DataColumn[] { dt.Columns["PartNumber"] };
+            
+            return dt;
+        }
+
         public static void Write(this DataTable dataTable, string filepath)
         {
             // Read table, while there is still a record

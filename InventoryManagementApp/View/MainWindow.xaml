@@ -6,10 +6,7 @@
         xmlns:local="clr-namespace:InventoryManagementApp.View"
         xmlns:viewModel="clr-namespace:InventoryManagementApp.ViewModel"
         mc:Ignorable="d"
-        Title="Inventroy Management Tool" Height="600" Width="800" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" WindowStyle="ToolWindow">
-    <Window.Resources>
-        <!--<viewModel:ConsoleWriter x:Key="consoleWriter"/>-->
-    </Window.Resources>
+        Title="Inventroy Management Tool" Height="700" Width="850" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" WindowStyle="ToolWindow">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="20"/>
@@ -28,11 +25,11 @@
             <Button x:Name="exitBtn" Content="Exit Inventory Management Tool" Margin="10,5,10,5" VerticalAlignment="Top" Grid.Column="1" Grid.Row="1" Click="exitBtn_Click"/>
         </StackPanel>
         <Label x:Name="label" Content="Status:" Grid.Column="1" HorizontalAlignment="Left" Margin="265,62,0,0" Grid.Row="1" VerticalAlignment="Top" FontSize="20"/>
-        <Button x:Name="clearBtn" Content="Clear" Grid.Column="1" HorizontalAlignment="Left" Margin="678,72,0,0" Grid.Row="1" VerticalAlignment="Top" Width="75" Click="clearBtn_Click"/>
-        <Border BorderBrush="Black" BorderThickness="1" Grid.Column="1" HorizontalAlignment="Left" Height="137" Margin="265,99,0,0" Grid.Row="1" VerticalAlignment="Top" Width="488">
+        <Button x:Name="clearBtn" Content="Clear" Grid.Column="1" Margin="0,72,20,0" Grid.Row="1" VerticalAlignment="Top" Click="clearBtn_Click" HorizontalAlignment="Right" Width="71"/>
+        <Border BorderBrush="Black" BorderThickness="1" Grid.Column="1" Height="137" Margin="265,99,20,0" Grid.Row="1" VerticalAlignment="Top">
             <TextBox x:Name="outputTb" TextWrapping="Wrap" IsReadOnly="True" VerticalScrollBarVisibility="Visible" />
         </Border>
-        <DataGrid x:Name="dataGrid" Grid.Column="1" Margin="10,0,20,20" Grid.Row="1" Height="241" VerticalAlignment="Bottom"/>
+        <DataGrid x:Name="soReqDataGrid" Grid.Column="1" Margin="10,0,20,20" Grid.Row="1" Height="341" VerticalAlignment="Bottom" SelectionMode="Single" SelectionUnit="Cell" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserSortColumns="False" CanUserResizeRows="False"/>
         <Label x:Name="label2" Content="SO Required:" FontSize="20" Grid.Column="1" HorizontalAlignment="Left" Margin="10,254,0,0" Grid.Row="1" VerticalAlignment="Top"/>
     </Grid>
 </Window>
