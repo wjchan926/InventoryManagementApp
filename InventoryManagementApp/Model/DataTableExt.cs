@@ -54,16 +54,20 @@ namespace InventoryManagementApp.Model
         public static DataTable BuildSOReqTable(this DataTable soReqTable, DataTable minMaxDt)
         {
             DataTable dt = new DataTable();
- 
-            IEnumerable<DataRow> minMaxRows =
+
+            try
+            {
+                IEnumerable<DataRow> minMaxRows =
                     from item in minMaxDt.AsEnumerable()
                     where (item.Field<int>("QtyOnHand") < item.Field<int>("Min")) && string.IsNullOrEmpty(item.Field<string>("RestockSONum"))
                     orderby item["Row"] ascending
                     select item;
 
-            dt = minMaxRows.CopyToDataTable<DataRow>();
-            dt.PrimaryKey = new DataColumn[] { dt.Columns["PartNumber"] };
-            
+                dt = minMaxRows.CopyToDataTable<DataRow>();
+                dt.PrimaryKey = new DataColumn[] { dt.Columns["PartNumber"] };
+            }
+            catch { }
+                        
             return dt;
         }
 

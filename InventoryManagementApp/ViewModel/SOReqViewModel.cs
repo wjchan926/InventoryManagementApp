@@ -46,5 +46,10 @@ namespace InventoryManagementApp.ViewModel
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
         #endregion
+
+        public void Update()
+        {
+            OnPropertyChanged("SOReqDataTable");
+        }
     }
 }

@@ -17,6 +17,8 @@ using System.Deployment.Application;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Data;
+using System.Diagnostics;
+using System.Threading;
 
 namespace InventoryManagementApp.View
 {
@@ -28,12 +30,19 @@ namespace InventoryManagementApp.View
         ExcelDocViewModel excelDocViewModel;
         LogViewModel logViewModel;
         SOReqViewModel soReqViewModel;
+        DataTable minMaxDt;
+        SOTableViewModel soTableViewModel;
+        ItemTableViewModel itemTableViewModel;
 
         private string version;
         
         public MainWindow()
         {
             InitializeComponent();
+
+            // Give program a second to spool up
+            Thread.Sleep(1000);
+
             try
             {
                 version = ApplicationDeployment.CurrentDeployment.CurrentVersion.ToString();
@@ -41,7 +50,7 @@ namespace InventoryManagementApp.View
             catch { }
             Title = "Inventory Mangement Tool V" + version;
             Topmost = true;
-
+            
             logViewModel = new LogViewModel();
 
             outputTb.SetBinding(TextBox.TextProperty, new Binding("Output")
@@ -55,53 +64,105 @@ namespace InventoryManagementApp.View
         {
             excelDocViewModel = new ExcelDocViewModel();
             excelDocViewModel.Open();
+            excelDocViewModel.SetExcelObjects();
 
-            logViewModel.UpdateStatus();
+            logViewModel.Update();
             outputTb.ScrollToEnd();
         }
 
         private void analyzeBtn_Click(object sender, RoutedEventArgs e)
-        {
-            Log.WriteLine("...Analyzing Part Numbers...");
-
-            logViewModel.UpdateStatus();
-            outputTb.ScrollToEnd();
-
-            openBtn.IsEnabled = false;
-            analyzeBtn.IsEnabled = false;
-            saveCloseBtn.IsEnabled = false;
-            exitBtn.IsEnabled = false;
-
-            SOTableViewModel soTableViewModel = new SOTableViewModel();
-            ItemTableViewModel itemTableViewModel = new ItemTableViewModel();
-            DataTable minMaxDt = excelDocViewModel.Analyze(itemTableViewModel.itemDataTable, soTableViewModel.soDataTable);
-
-            soReqViewModel = new SOReqViewModel(minMaxDt);
-
-            soReqDataGrid.SetBinding(DataGrid.ItemsSourceProperty, new Binding("SOReqDataTable")
+        {   
+            if(excelDocViewModel == null)
             {
-                Source = soReqViewModel,
-                Mode = BindingMode.TwoWay
-            });
+                excelDocViewModel = new ExcelDocViewModel();
+                try
+                {
+                    excelDocViewModel.SetExcelObjects();
+                }
+                catch { }
+            }
+            else
+            {
+                try
+                {
+                    excelDocViewModel.SetExcelObjects();
+                }
+                catch { }
+            }
 
-            logViewModel.UpdateStatus();
+            if (excelDocViewModel != null && excelDocViewModel.excelObjSet)
+            {
+                Log.WriteLine("...Analyzing Part Numbers...");
+
+                logViewModel.Update();
+                outputTb.ScrollToEnd();
+
+                openBtn.IsEnabled = false;
+                analyzeBtn.IsEnabled = false;
+                saveCloseBtn.IsEnabled = false;
+
+                soTableViewModel = new SOTableViewModel();
+                itemTableViewModel = new ItemTableViewModel();
+
+                minMaxDt = excelDocViewModel.Analyze(itemTableViewModel.itemDataTable, soTableViewModel.soDataTable);
+
+                soReqViewModel = new SOReqViewModel(minMaxDt);
+
+                soReqDataGrid.SetBinding(DataGrid.ItemsSourceProperty, new Binding("SOReqDataTable")
+                {
+                    Source = soReqViewModel,
+                    Mode = BindingMode.TwoWay
+                });                
+
+                openBtn.IsEnabled = true;
+                analyzeBtn.IsEnabled = true;
+                saveCloseBtn.IsEnabled = true;
+                updateExcelBtn.IsEnabled = true;
+            }
+            else
+            {
+                Log.WriteLine("Min-Max Document Not Found.");
+
+            }
+
+            logViewModel.Update();
             outputTb.ScrollToEnd();
-
-            openBtn.IsEnabled = true;
-            analyzeBtn.IsEnabled = true;
-            saveCloseBtn.IsEnabled = true;
-            exitBtn.IsEnabled = true;
         }
 
         private void saveCloseBtn_Click(object sender, RoutedEventArgs e)
         {
-            using (excelDocViewModel.excelDoc)
+            if (excelDocViewModel == null)
             {
-                excelDocViewModel.excelDoc.Close();
-
-                logViewModel.UpdateStatus();
-                outputTb.ScrollToEnd();
+                excelDocViewModel = new ExcelDocViewModel();
+                try
+                {
+                    excelDocViewModel.SetExcelObjects();
+                }
+                catch { }
             }
+            else
+            {
+                try
+                {
+                    excelDocViewModel.SetExcelObjects();
+                }
+                catch { }
+            }
+
+            if (excelDocViewModel != null && excelDocViewModel.excelObjSet)
+            {
+                using (excelDocViewModel.excelDoc)
+                {
+                    excelDocViewModel.excelDoc.Close();
+                }
+                updateExcelBtn.IsEnabled = false;
+            }
+            else
+            {
+                Log.WriteLine("Min-Max Document Not Found.");
+            }
+            logViewModel.Update();
+            outputTb.ScrollToEnd();
         }
 
         private void exitBtn_Click(object sender, RoutedEventArgs e)
@@ -119,7 +180,22 @@ namespace InventoryManagementApp.View
         {
             Log.Clear();
 
-            logViewModel.UpdateStatus();
+            logViewModel.Update();
+            outputTb.ScrollToEnd();
+        }
+
+        private void updateExcelBtn_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                excelDocViewModel.UpdateSO(soReqViewModel.SOReqDataTable);
+            }
+            catch (Exception)
+            {
+                Log.WriteLine("Min-Max Update Failed.");
+            }
+            
+            logViewModel.Update();
             outputTb.ScrollToEnd();
         }
     }

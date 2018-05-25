@@ -48,7 +48,7 @@ namespace InventoryManagementApp.ViewModel
         }
         #endregion
 
-        public void UpdateStatus()
+        public void Update()
         {            
             OnPropertyChanged("Output");
         }

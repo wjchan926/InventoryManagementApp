@@ -20,6 +20,7 @@ namespace InventoryManagementApp.Model
         public Excel.Range myRange { get; private set; }
         public readonly string minMaxPath = @"\\MSW-FP1\Shared\DG Inventory Management.xlsx";
         public Dictionary<string, ExcelPartNumber> partNumList { get; private set; }
+        public bool excelObjSet { get; private set; } = false;
         
         /// <summary>
         /// Default Constructor for the Excel Doc class
@@ -31,7 +32,6 @@ namespace InventoryManagementApp.Model
             myBook = null;
             mySheet = null;
             myRange = null;
-            partNumList = new Dictionary<string, ExcelPartNumber>();
         }
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace InventoryManagementApp.Model
                 try
                 {
                     myApp = (Excel.Application)Marshal.GetActiveObject("Excel.Application");
-                    Console.WriteLine("Instance of Excel Found");
+                    Log.WriteLine("Instance of Excel Found");
                 }
                 catch (COMException e)
                 {
@@ -54,15 +54,26 @@ namespace InventoryManagementApp.Model
             }
             else
             {
-                myApp = new Excel.Application();
-                Console.WriteLine("New Instance of Excel Created.");
+                try
+                {
+                    myApp = new Excel.Application();
+                    Log.WriteLine("New Instance of Excel Created.");
+                }
+                catch (Exception)
+                {
+                    Log.WriteLine("Cannot Access File on network, try Again.");
+                }
             }
 
             myApp.Visible = true;            // True to see new instance, false to hide
             myApp.DisplayAlerts = false;            // Hide alerts
 
             // Set the objects to corresponding excel objects
-            SetExcelObjects();
+            myBooks = myApp.Workbooks;
+            myBook = myBooks.Open(minMaxPath);
+            mySheet = myBook.Sheets["Marlin Steel"];
+            
+            // SetExcelObjects();
             Log.WriteLine("Min-Max Document Opened.");
         }
         
@@ -74,22 +85,22 @@ namespace InventoryManagementApp.Model
             // Sets workbook to path specified                  
             try
             {
+                myApp = (Excel.Application)Marshal.GetActiveObject("Excel.Application");
                 myBooks = myApp.Workbooks;
-                myBook = myBooks.Open(minMaxPath);
+                myBook = myBooks["DG Inventory Management.xlsx"];
                 mySheet = myBook.Sheets["Marlin Steel"];
                 setRange();
+                excelObjSet = true;
             }
             catch (NullReferenceException e)
             {
                 // If file is not found
                 Console.WriteLine(e.Message);
-                throw;
             }
             catch (Exception e)
             {
                 // Other problemsW
                 Console.WriteLine(e.Message);
-                throw;
             }
             Log.WriteLine("Excel Objects Set.");
         }
@@ -108,7 +119,7 @@ namespace InventoryManagementApp.Model
             Marshal.ReleaseComObject(lastCellUsed);
             Marshal.ReleaseComObject(lastCell);
 
-            myRange = mySheet.Range[ExcelColumn.partNumber + "2", ExcelColumn.restockSODate + lastUsedRow + ""];          
+            myRange = mySheet.Range[ExcelColumn.partNumber + "2", ExcelColumn.restockSODate + lastUsedRow + ""];        
         }
         
         /// <summary>
@@ -123,12 +134,13 @@ namespace InventoryManagementApp.Model
                 myBooks.Close();
                 myApp.Quit();
                 myApp.DisplayAlerts = true;
+                excelObjSet = false;
+                Log.WriteLine("Min-Max Document Saved and Closed.");
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);    
             }
-            Log.WriteLine("Min-Max Document Saved and Closed.");
         }
                          
         /// <summary>
@@ -136,7 +148,7 @@ namespace InventoryManagementApp.Model
         /// </summary>
         public void InStreamData()
         {
-            setRange();
+            partNumList = new Dictionary<string, ExcelPartNumber>();
 
             foreach (Excel.Range row in myRange.Rows)
             {
@@ -172,6 +184,16 @@ namespace InventoryManagementApp.Model
             Log.WriteLine("Analysis Complete.");
         }   
         
+        public void UpdateSO(DataTable soReqDataTable)
+        {
+            foreach (DataRow row in soReqDataTable.Rows)
+            {
+                myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.restockSONum] = row["RestockSONum"];
+                myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.restockSODate] = row["RestockSODate"];             
+            }
+            Log.WriteLine("Restock SO Updated on Min-Max Document.");
+        }
+
         public void Dispose()
         {
             try
@@ -182,6 +204,8 @@ namespace InventoryManagementApp.Model
                 Marshal.ReleaseComObject(myBooks);
                 Marshal.ReleaseComObject(myApp);
                 Console.WriteLine("All Excel Objects Released.");
+                Log.WriteLine("All Excel Objects Released.");
+                excelObjSet = false;
             }
             catch (Exception e)
             {

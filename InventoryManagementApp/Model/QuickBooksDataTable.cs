@@ -35,7 +35,7 @@ namespace InventoryManagementApp.Model
                     }
                     catch (OdbcException sqlError)
                     {
-  //                      ConsoleWriter.WriteLine("SQL Statment Incorrect: " + sqlError.Message);
+                        Console.WriteLine("SQL Statment Incorrect: " + sqlError.Message);
                     }
                     catch (Exception)
                     {

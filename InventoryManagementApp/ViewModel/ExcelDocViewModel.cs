@@ -12,6 +12,18 @@ namespace InventoryManagementApp.ViewModel
     {
         public ExcelDoc excelDoc { get; private set; }
 
+        public bool excelObjSet
+        {
+            get
+            {
+                return excelDoc.excelObjSet;
+            }
+            private set { }
+        }
+        
+
+        private DataTable minMaxDt;
+        
         public ExcelDocViewModel()
         {
             excelDoc = new ExcelDoc();
@@ -27,20 +39,27 @@ namespace InventoryManagementApp.ViewModel
             excelDoc.Close();
         }
 
-        public DataTable Analyze(IQuickBooksData itemDataTable, IQuickBooksData salesOrderDataTable)
+        public void SetExcelObjects()
         {
             excelDoc.SetExcelObjects();
+        }
 
+        public void UpdateSO(DataTable soReqDataTable)
+        {
+            excelDoc.UpdateSO(soReqDataTable);
+        }
+
+        public DataTable Analyze(IQuickBooksData itemDataTable, IQuickBooksData salesOrderDataTable)
+        {         
             excelDoc.InStreamData();
             itemDataTable.BuildTable();
             salesOrderDataTable.BuildTable();
 
-            DataTable minMaxDt = new DataTable().BuildTable(salesOrderDataTable, itemDataTable, excelDoc.partNumList);
+            minMaxDt = new DataTable().BuildTable(salesOrderDataTable, itemDataTable, excelDoc.partNumList);
 
             excelDoc.Write(minMaxDt);
-
-            return minMaxDt;
-        }
-
+            return minMaxDt;           
+      
+        }    
     }
 }
