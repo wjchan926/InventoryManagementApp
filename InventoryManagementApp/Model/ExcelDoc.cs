@@ -102,7 +102,7 @@ namespace InventoryManagementApp.Model
                 // Other problemsW
                 Console.WriteLine(e.Message);
             }
-            Log.WriteLine("Excel Objects Set.");
+            Console.WriteLine("Excel Objects Set.");
         }
 
         /// <summary>
@@ -177,7 +177,7 @@ namespace InventoryManagementApp.Model
                 myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.quantitySold] = row["Last15Months"];
                 myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.maxStockRev] = String.Format("{0:C}", row["MaxStockRev"]);
                 myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.restockSONum] = row["RestockSONum"];
-                myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.restockSODate] = row["RestockSODate"];
+                myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.restockSODate] = String.Format("{0:M/d/yyyy}", row["RestockSODate"]);
                 Log.WriteLine(row["PartNumber"].ToString() + " Analyzed");
             }
 
@@ -189,7 +189,7 @@ namespace InventoryManagementApp.Model
             foreach (DataRow row in soReqDataTable.Rows)
             {
                 myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.restockSONum] = row["RestockSONum"];
-                myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.restockSODate] = row["RestockSODate"];             
+                myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.restockSODate] = String.Format("{0:M/d/yyyy}", row["RestockSODate"]);             
             }
             Log.WriteLine("Restock SO Updated on Min-Max Document.");
         }

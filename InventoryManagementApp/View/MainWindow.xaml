@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:InventoryManagementApp.View"
         xmlns:viewModel="clr-namespace:InventoryManagementApp.ViewModel"
         mc:Ignorable="d"
-        Title="Inventroy Management Tool" Height="700" Width="850" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" WindowStyle="ToolWindow">
+        Title="Inventroy Management Tool" Height="1000" Width="850" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" WindowStyle="ToolWindow">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="20"/>
@@ -29,8 +29,10 @@
         <Border BorderBrush="Black" BorderThickness="1" Grid.Column="1" Height="137" Margin="265,99,20,0" Grid.Row="1" VerticalAlignment="Top">
             <TextBox x:Name="outputTb" TextWrapping="Wrap" IsReadOnly="True" VerticalScrollBarVisibility="Visible" />
         </Border>
-        <DataGrid x:Name="soReqDataGrid" Grid.Column="1" Margin="10,0,20,20" Grid.Row="1" Height="341" VerticalAlignment="Bottom" SelectionMode="Single" SelectionUnit="Cell" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserSortColumns="False" CanUserResizeRows="False"/>
+        <DataGrid x:Name="soReqDataGrid" Grid.Column="1" Margin="10,296,20,320" Grid.Row="1" SelectionMode="Single" SelectionUnit="Cell" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserSortColumns="False" CanUserResizeRows="False"/>
         <Label x:Name="label2" Content="SO Required:" FontSize="20" Grid.Column="1" HorizontalAlignment="Left" Margin="10,254,0,0" Grid.Row="1" VerticalAlignment="Top"/>
         <Button x:Name="updateExcelBtn" Content="Update Min-Max Doc" Grid.Column="1" HorizontalAlignment="Right" Margin="0,254,20,0" Grid.Row="1" VerticalAlignment="Top" Width="130" Click="updateExcelBtn_Click" IsEnabled="False"/>
+        <Label x:Name="label3" Content="Pending Build:" FontSize="20" Grid.Column="1" HorizontalAlignment="Left" Margin="10,651,0,0" Grid.Row="1" VerticalAlignment="Top"/>
+        <DataGrid x:Name="pendingDataGrid" Grid.Column="1" Margin="10,693,20,10" Grid.Row="1" IsReadOnly="True" CanUserResizeColumns="False" CanUserReorderColumns="False" CanUserResizeRows="False" CanUserSortColumns="False"/>
     </Grid>
 </Window>

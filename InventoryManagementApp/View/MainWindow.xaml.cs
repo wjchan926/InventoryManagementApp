@@ -30,6 +30,7 @@ namespace InventoryManagementApp.View
         ExcelDocViewModel excelDocViewModel;
         LogViewModel logViewModel;
         SOReqViewModel soReqViewModel;
+        PendingTableViewModel pendingTableViewModel;
         DataTable minMaxDt;
         SOTableViewModel soTableViewModel;
         ItemTableViewModel itemTableViewModel;
@@ -107,12 +108,19 @@ namespace InventoryManagementApp.View
                 minMaxDt = excelDocViewModel.Analyze(itemTableViewModel.itemDataTable, soTableViewModel.soDataTable);
 
                 soReqViewModel = new SOReqViewModel(minMaxDt);
+                pendingTableViewModel = new PendingTableViewModel(minMaxDt);
 
                 soReqDataGrid.SetBinding(DataGrid.ItemsSourceProperty, new Binding("SOReqDataTable")
                 {
                     Source = soReqViewModel,
                     Mode = BindingMode.TwoWay
-                });                
+                });
+
+                pendingDataGrid.SetBinding(DataGrid.ItemsSourceProperty, new Binding("PendingDataTable")
+                {
+                    Source = pendingTableViewModel,
+                    Mode = BindingMode.OneWay
+                });
 
                 openBtn.IsEnabled = true;
                 analyzeBtn.IsEnabled = true;

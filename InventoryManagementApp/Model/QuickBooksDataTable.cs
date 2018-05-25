@@ -19,29 +19,37 @@ namespace InventoryManagementApp.Model
 
         protected void QueryQB(string sqlCmdStr)
         {
-   //         ConsoleWriter.WriteLine("Accessing QuickBooks Database.");
-            
-            using (OdbcConnection con = new OdbcConnection("Dsn=QuickBooks Data"))
+            //         ConsoleWriter.WriteLine("Accessing QuickBooks Database.");
+
+            try
             {
-                con.Open(); //Open Connection
-                
-                using (OdbcDataAdapter dAdapter = new OdbcDataAdapter(sqlCmdStr, con))
+                using (OdbcConnection con = new OdbcConnection("Dsn=QuickBooks Data"))
                 {
-                    dAdapter.FillError += new FillErrorEventHandler(FillError);
-                    try
+                    con.Open(); //Open Connection
+                    Log.WriteLine("Accessing QuickBooks Database.");
+
+                    using (OdbcDataAdapter dAdapter = new OdbcDataAdapter(sqlCmdStr, con))
                     {
-                        dAdapter.Fill(this);
-    //                    ConsoleWriter.WriteLine("Data Table Filled.");
-                    }
-                    catch (OdbcException sqlError)
-                    {
-                        Console.WriteLine("SQL Statment Incorrect: " + sqlError.Message);
-                    }
-                    catch (Exception)
-                    {
-    //                    ConsoleWriter.WriteLine("Data Table Filled Failed.");
+                        dAdapter.FillError += new FillErrorEventHandler(FillError);
+                        try
+                        {
+                            dAdapter.Fill(this);
+                            //                    ConsoleWriter.WriteLine("Data Table Filled.");
+                        }
+                        catch (OdbcException sqlError)
+                        {
+                            Console.WriteLine("SQL Statment Incorrect: " + sqlError.Message);
+                        }
+                        catch (Exception)
+                        {
+                            //                    ConsoleWriter.WriteLine("Data Table Filled Failed.");
+                        }
                     }
                 }
+            }
+            catch 
+            {
+                Log.WriteLine("QuickBooks Connection Failed.");
             }
              
         }

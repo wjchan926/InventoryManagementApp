@@ -25,24 +25,26 @@ namespace InventoryManagementApp.Model
                         PartNumber = item.Field<string>("PartNumber"),
                         QtyOnHand = (int)item.Field<decimal>("QtyOnHand"),
                         RestockSONum = partNumList[item.Field<string>("PartNumber")].restockSONum,
-                        RestockSODate = partNumList[item.Field<string>("PartNumber")].restockSODate
+                        RestockSODate = string.IsNullOrEmpty(partNumList[item.Field<string>("PartNumber")].restockSODate) ? 
+                            Convert.ToString((DateTime?)null) : 
+                            DateTime.FromOADate(Convert.ToDouble(partNumList[item.Field<string>("PartNumber")].restockSODate)).ToShortDateString()
                     } into itemGroup
                     select new
                     {
                         Row = itemGroup.Key.Row + 1,
                         PartNumber = itemGroup.Key.PartNumber,
                         Min = (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 1.5m / 15.0m),
-                        Max = (int)((itemGroup.Average(so => so.Field<decimal>("SalePrice")) * (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 3m / 15m))) > 1000 ? 
-                            (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 3m / 15m) : 
+                        Max = (int)((itemGroup.Average(so => so.Field<decimal>("SalePrice")) * (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 3m / 15m))) > 1000 ?
+                            (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 3m / 15m) :
                             (int)(1000m / itemGroup.Average(so => so.Field<decimal>("SalePrice"))),
                         QtyOnHand = itemGroup.Key.QtyOnHand,
-                        AvgSalePrice = Math.Round(itemGroup.Average(so => so.Field<decimal>("SalePrice")), 2),
+                        AvgSalePrice = String.Format("{0:C}", itemGroup.Average(so => so.Field<decimal>("SalePrice"))),
                         Last15Months = (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity"))),
                         MaxStockRev = (int)((itemGroup.Average(so => so.Field<decimal>("SalePrice")) * (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 3m / 15m))) > 1000 ?
-                            (int)((itemGroup.Average(so => so.Field<decimal>("SalePrice")) * (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 3m / 15m))) :
-                            (int)((1000m / itemGroup.Average(so => so.Field<decimal>("SalePrice"))) * (itemGroup.Average(so => so.Field<decimal>("SalePrice")))),
-                        RestockSONum = itemGroup.Key.RestockSONum,
-                        RestockSODate = itemGroup.Key.RestockSODate
+                            String.Format("{0:C}", (int)((itemGroup.Average(so => so.Field<decimal>("SalePrice")) * (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 3m / 15m)))) :
+                            String.Format("{0:C}", (int)((1000m / itemGroup.Average(so => so.Field<decimal>("SalePrice"))) * (itemGroup.Average(so => so.Field<decimal>("SalePrice"))))),
+                        RestockSONum = itemGroup.Key.QtyOnHand >= (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 1.5m / 15.0m) ? "" : itemGroup.Key.RestockSONum,
+                        RestockSODate = itemGroup.Key.QtyOnHand >= (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 1.5m / 15.0m) ? "" : itemGroup.Key.RestockSODate
                     };
 
             dt = minMaxGroup.CustomCopyToDataTable();
@@ -68,6 +70,25 @@ namespace InventoryManagementApp.Model
             }
             catch { }
                         
+            return dt;
+        }
+
+        public static DataTable BuildPending(this DataTable pendingDt, DataTable minMaxDt)
+        {
+            DataTable dt = new DataTable();         
+            try
+            {
+                IEnumerable<DataRow> minMaxRows =
+                    from item in minMaxDt.AsEnumerable()
+                    where (item.Field<int>("QtyOnHand") < item.Field<int>("Min")) && !string.IsNullOrEmpty(item.Field<string>("RestockSONum"))
+                    orderby item["Row"] ascending
+                    select item;
+
+                dt = minMaxRows.CopyToDataTable<DataRow>();
+                dt.PrimaryKey = new DataColumn[] { dt.Columns["PartNumber"] };
+            }
+            catch { }
+
             return dt;
         }
 
