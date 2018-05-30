@@ -38,6 +38,7 @@ namespace InventoryManagementApp.ViewModel
             {
                 excelDoc.SetExcelObjects();
             }
+
             excelDoc.UpdateSO(soReqDataTable); 
         }
 
