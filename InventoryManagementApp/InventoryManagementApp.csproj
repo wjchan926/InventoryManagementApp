@@ -33,8 +33,8 @@
     <SuiteName>Marlin Software</SuiteName>
     <MinimumRequiredVersion>1.0.0.2</MinimumRequiredVersion>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
-    <ApplicationRevision>4</ApplicationRevision>
-    <ApplicationVersion>1.2.0.%2a</ApplicationVersion>
+    <ApplicationRevision>1</ApplicationRevision>
+    <ApplicationVersion>1.3.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -119,6 +119,7 @@
     </ApplicationDefinition>
     <Compile Include="Model\IQuickBooksData.cs" />
     <Compile Include="Model\Log.cs" />
+    <Compile Include="ViewModel\IExcelViewModel.cs" />
     <Compile Include="ViewModel\LogViewModel.cs" />
     <Compile Include="InvManTest.cs" />
     <Compile Include="QuickBooksDataSet.Designer.cs">
@@ -131,10 +132,8 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ViewModel\ExcelDocViewModel.cs" />
-    <Compile Include="ViewModel\ItemTableViewModel.cs" />
     <Compile Include="ViewModel\PendingTableViewModel.cs" />
     <Compile Include="ViewModel\SOReqViewModel.cs" />
-    <Compile Include="ViewModel\SOTableViewModel.cs" />
     <Compile Include="View\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>

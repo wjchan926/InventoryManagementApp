@@ -8,57 +8,67 @@ using System.Data;
 
 namespace InventoryManagementApp.ViewModel
 {
-    sealed class ExcelDocViewModel
+    class ExcelDocViewModel : IExcelViewModel
     {
-        public ExcelDoc excelDoc { get; private set; }
-
-        public bool excelObjSet
-        {
-            get
-            {
-                return excelDoc.excelObjSet;
-            }
-            private set { }
-        }
+        private ExcelDoc excelDoc = new ExcelDoc();
         
-
         private DataTable minMaxDt;
-        
-        public ExcelDocViewModel()
-        {
-            excelDoc = new ExcelDoc();
-        }
-                
+                        
         public void Open()
-        {
-            excelDoc.Open();
+        {            
+            excelDoc.Open();            
         }
 
         public void Close()
         {
-            excelDoc.Close();
+            excelDoc.Close(); 
         }
 
-        public void SetExcelObjects()
+        public void Dispose()
         {
-            excelDoc.SetExcelObjects();
+            using (excelDoc)
+            {
+                excelDoc.Dispose();
+            }
         }
-
+        
         public void UpdateSO(DataTable soReqDataTable)
         {
-            excelDoc.UpdateSO(soReqDataTable);
+            if (!excelDoc.excelObjSet)
+            {
+                excelDoc.SetExcelObjects();
+            }
+            excelDoc.UpdateSO(soReqDataTable); 
         }
 
-        public DataTable Analyze(IQuickBooksData itemDataTable, IQuickBooksData salesOrderDataTable)
+        public DataTable Analyze()
         {         
-            excelDoc.InStreamData();
-            itemDataTable.BuildTable();
-            salesOrderDataTable.BuildTable();
+            if (!excelDoc.excelObjSet)
+            {
+                excelDoc.SetExcelObjects();
+            }
 
-            minMaxDt = new DataTable().BuildTable(salesOrderDataTable, itemDataTable, excelDoc.partNumList);
+            if (excelDoc.excelObjSet)
+            {
+                Log.WriteLine("...Analyzing Part Numbers...");
 
-            excelDoc.Write(minMaxDt);
-            return minMaxDt;           
+                IQuickBooksData itemDataTable = new ItemDataTable();
+                IQuickBooksData salesOrderDataTable = new SODataTable();
+
+                excelDoc.InStreamData();
+                itemDataTable.BuildTable();
+                salesOrderDataTable.BuildTable();
+
+                minMaxDt = new DataTable().BuildTable(salesOrderDataTable, itemDataTable, excelDoc.partNumList);
+
+                excelDoc.Write(minMaxDt);
+                return minMaxDt;
+            }
+            else
+            {
+                Log.WriteLine("Cannot Access Min-Max Document.");
+                return new DataTable();
+            }
       
         }    
     }

@@ -3,19 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Data;
 using InventoryManagementApp.Model;
 
 namespace InventoryManagementApp.ViewModel
 {
-    class SOTableViewModel
-    {
-        public IQuickBooksData soDataTable
-        {
-            get
-            {
-                return new SODataTable();
-            }
-        }
-
+    interface IExcelViewModel
+    {        
+        void Open();
+        void Close();
+        void Dispose();
+        void UpdateSO(DataTable soReqDataTable);
+        DataTable Analyze();
     }
 }

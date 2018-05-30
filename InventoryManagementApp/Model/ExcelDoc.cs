@@ -13,12 +13,12 @@ namespace InventoryManagementApp.Model
 {
     class ExcelDoc : IDisposable
     {
-        public Excel.Application myApp { get; private set; } 
-        public Excel.Workbook myBook { get; private set; } 
-        public Excel.Workbooks myBooks { get; private set; }
-        public Excel.Worksheet mySheet { get; private set; }
-        public Excel.Range myRange { get; private set; }
-        public readonly string minMaxPath = @"\\MSW-FP1\Shared\DG Inventory Management.xlsx";
+        Excel.Application myApp;
+        Excel.Workbook myBook;
+        Excel.Workbooks myBooks;
+        Excel.Worksheet mySheet;
+        Excel.Range myRange;
+        readonly string minMaxPath = @"\\MSW-FP1\Shared\DG Inventory Management.xlsx";
         public Dictionary<string, ExcelPartNumber> partNumList { get; private set; }
         public bool excelObjSet { get; private set; } = false;
         
@@ -72,6 +72,9 @@ namespace InventoryManagementApp.Model
             myBooks = myApp.Workbooks;
             myBook = myBooks.Open(minMaxPath);
             mySheet = myBook.Sheets["Marlin Steel"];
+            setRange();
+
+            excelObjSet = true;
             
             // SetExcelObjects();
             Log.WriteLine("Min-Max Document Opened.");
@@ -91,6 +94,7 @@ namespace InventoryManagementApp.Model
                 mySheet = myBook.Sheets["Marlin Steel"];
                 setRange();
                 excelObjSet = true;
+                Console.WriteLine("Excel Objects Set.");
             }
             catch (NullReferenceException e)
             {
@@ -102,7 +106,7 @@ namespace InventoryManagementApp.Model
                 // Other problemsW
                 Console.WriteLine(e.Message);
             }
-            Console.WriteLine("Excel Objects Set.");
+
         }
 
         /// <summary>
@@ -130,15 +134,17 @@ namespace InventoryManagementApp.Model
         {
             try
             {
+                SetExcelObjects();
                 myBook.Close(true, Type.Missing, Type.Missing);
                 myBooks.Close();
                 myApp.Quit();
                 myApp.DisplayAlerts = true;
-                excelObjSet = false;
+                Dispose();
                 Log.WriteLine("Min-Max Document Saved and Closed.");
             }
             catch (Exception e)
             {
+                Log.WriteLine("Cannot Access Min-Max Document.");
                 Console.WriteLine(e.Message);    
             }
         }
@@ -148,20 +154,27 @@ namespace InventoryManagementApp.Model
         /// </summary>
         public void InStreamData()
         {
-            partNumList = new Dictionary<string, ExcelPartNumber>();
-
-            foreach (Excel.Range row in myRange.Rows)
+            try
             {
-                object value = myRange[row.Row-1, ExcelColumn.partNumber].Value2;
-                string convertedPartNumber = Convert.ToString(value);
-                //     partNumList.Add(convertedPartNumber, row.Row);
-                dynamic soNumVal = myRange[row.Row-1, ExcelColumn.restockSONum].Value2;
-                string conSoNumVal = Convert.ToString(soNumVal);
-                dynamic soDateVal = myRange[row.Row-1, ExcelColumn.restockSODate].Value2;
-                string conSoDateVal = Convert.ToString(soDateVal);
-                partNumList.Add(convertedPartNumber, new ExcelPartNumber(row.Row-1, conSoNumVal, conSoDateVal));
+                partNumList = new Dictionary<string, ExcelPartNumber>();
+
+                foreach (Excel.Range row in myRange.Rows)
+                {
+                    object value = myRange[row.Row - 1, ExcelColumn.partNumber].Value2;
+                    string convertedPartNumber = Convert.ToString(value);
+                    //     partNumList.Add(convertedPartNumber, row.Row);
+                    dynamic soNumVal = myRange[row.Row - 1, ExcelColumn.restockSONum].Value2;
+                    string conSoNumVal = Convert.ToString(soNumVal);
+                    dynamic soDateVal = myRange[row.Row - 1, ExcelColumn.restockSODate].Value2;
+                    string conSoDateVal = Convert.ToString(soDateVal);
+                    partNumList.Add(convertedPartNumber, new ExcelPartNumber(row.Row - 1, conSoNumVal, conSoDateVal));
+                }
+                Log.WriteLine(partNumList.Count + " Entries Found.");
             }
-            Log.WriteLine(partNumList.Count + " Entries Found.");       
+            catch 
+            {
+                Log.WriteLine("Cannot Access Min-Max Document.");
+            }
         }
 
         public void Write(object writeOb)
@@ -186,12 +199,20 @@ namespace InventoryManagementApp.Model
         
         public void UpdateSO(DataTable soReqDataTable)
         {
-            foreach (DataRow row in soReqDataTable.Rows)
+            try
             {
-                myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.restockSONum] = row["RestockSONum"];
-                myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.restockSODate] = String.Format("{0:M/d/yyyy}", row["RestockSODate"]);             
+                foreach (DataRow row in soReqDataTable.Rows)
+                {
+                    myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.restockSONum] = row["RestockSONum"];
+                    myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.restockSODate] = String.Format("{0:M/d/yyyy}", row["RestockSODate"]);
+                }
+                Log.WriteLine("Restock SO Updated on Min-Max Document.");
             }
-            Log.WriteLine("Restock SO Updated on Min-Max Document.");
+            catch
+            {
+                Log.WriteLine("Cannot Access Min-Max Document.");
+            }
+  
         }
 
         public void Dispose()
@@ -204,11 +225,16 @@ namespace InventoryManagementApp.Model
                 Marshal.ReleaseComObject(myBooks);
                 Marshal.ReleaseComObject(myApp);
                 Console.WriteLine("All Excel Objects Released.");
-                Log.WriteLine("All Excel Objects Released.");
                 excelObjSet = false;
+                myApp = null;
+                myBooks = null;
+                myBook = null;
+                mySheet = null;
+                myRange = null;
             }
             catch (Exception e)
             {
+                Log.WriteLine("Cannot Access Min-Max Document.");
                 Console.WriteLine("Release Failed:\n" + e.Message);
             }
         }

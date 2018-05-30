@@ -31,7 +31,7 @@
         </Border>
         <DataGrid x:Name="soReqDataGrid" Grid.Column="1" Margin="10,296,20,320" Grid.Row="1" SelectionMode="Single" SelectionUnit="Cell" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserSortColumns="False" CanUserResizeRows="False"/>
         <Label x:Name="label2" Content="SO Required:" FontSize="20" Grid.Column="1" HorizontalAlignment="Left" Margin="10,254,0,0" Grid.Row="1" VerticalAlignment="Top"/>
-        <Button x:Name="updateExcelBtn" Content="Update Min-Max Doc" Grid.Column="1" HorizontalAlignment="Right" Margin="0,265,20,0" Grid.Row="1" VerticalAlignment="Top" Width="130" Click="updateExcelBtn_Click" IsEnabled="False"/>
+        <Button x:Name="updateExcelBtn" Content="Update Min-Max Doc" Grid.Column="1" HorizontalAlignment="Right" Margin="0,265,20,0" Grid.Row="1" VerticalAlignment="Top" Width="130" Click="updateExcelBtn_Click"/>
         <Label x:Name="label3" Content="Pending Build:" FontSize="20" Grid.Column="1" HorizontalAlignment="Left" Margin="10,651,0,0" Grid.Row="1" VerticalAlignment="Top"/>
         <DataGrid x:Name="pendingDataGrid" Grid.Column="1" Margin="10,693,20,10" Grid.Row="1" IsReadOnly="True" CanUserResizeColumns="False" CanUserReorderColumns="False" CanUserResizeRows="False" CanUserSortColumns="False"/>
     </Grid>

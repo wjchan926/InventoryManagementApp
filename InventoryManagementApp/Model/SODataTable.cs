@@ -37,6 +37,7 @@ namespace InventoryManagementApp.Model
             catch (Exception e)
             {
                 System.Diagnostics.Debug.WriteLine("Cannot convert SO Data.\n" + e.Message);
+                System.Diagnostics.Debug.WriteLine(errorSOQty.ToString() + " " + errorSalePrice.ToString() + " " + errorShipDate.ToString());
             }
 
             DataRow myRow = args.DataTable.Rows.Add(new object[]
