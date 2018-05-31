@@ -58,6 +58,7 @@ namespace InventoryManagementApp
 
             soTable.Write(@"\\msw-fp1\user$\wchan\Documents\Visual Studio 2015\Projects\InventoryManagementApp\InventoryManagementApp\bin\Debug\Test\\PolySO.csv");
         }
+        
 
         [Test]
         public void PolyMinMaxTest()

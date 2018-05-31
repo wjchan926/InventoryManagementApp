@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:InventoryManagementApp.View"
         xmlns:viewModel="clr-namespace:InventoryManagementApp.ViewModel"
         mc:Ignorable="d"
-        Title="Inventroy Management Tool" Height="1000" Width="850" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" WindowStyle="ToolWindow">
+        Title="Inventroy Management Tool" Height="1000" Width="750" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" WindowStyle="ToolWindow">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="20"/>

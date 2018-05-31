@@ -15,7 +15,7 @@ namespace InventoryManagementApp.Model
         {
             get
             {
-                return "SELECT SalesOrderLine.SalesOrderLineItemRefFullName AS PartNumber, SalesOrderLine.SalesOrderLineQuantity AS Quantity, SalesOrderLine.SalesOrderLineRate AS SalePrice, SalesOrderLine.ShipDate AS ShipDate " +
+                return "SELECT SalesOrderLine.SalesOrderLineItemRefFullName AS PartNumber, SalesOrderLine.SalesOrderLineQuantity AS Quantity, SalesOrderLine.SalesOrderLineRate AS SalePrice, SalesOrderLine.ShipDate AS ShipDate, SalesOrderLine.CustomerRefFullName AS Customer " +
                            "FROM SalesOrderLine " +
                            "WHERE (SalesOrderLine.SalesOrderLineItemRefFullName IS NOT NULL) AND (SalesOrderLine.ShipDate IS NOT NULL) AND (SalesOrderLine.SalesOrderLineQuantity IS NOT NULL) AND (SalesOrderLine.SalesOrderLineRate > 0)";
             }

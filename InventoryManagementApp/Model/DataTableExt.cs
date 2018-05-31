@@ -18,13 +18,12 @@ namespace InventoryManagementApp.Model
                     from item in ((QuickBooksDataTable)itemDataTable).AsEnumerable()
                     join so in ((QuickBooksDataTable)salesOrderDataTable).AsEnumerable()
                     on item.Field<string>("PartNumber") equals so.Field<string>("PartNumber")
-                    where partNumList.Keys.Contains(item.Field<string>("PartNumber")) && so.Field<DateTime>("ShipDate") >= startDate
+                    where partNumList.Keys.Contains(item.Field<string>("PartNumber")) && so.Field<DateTime>("ShipDate") >= startDate && !so.Field<string>("Customer").Contains("Marlin Ste")
                     group so by new
                     {
                         Row = partNumList[item.Field<string>("PartNumber")].rowNum,
                         PartNumber = item.Field<string>("PartNumber"),
                         QtyOnHand = (int)item.Field<decimal>("QtyOnHand"),
-                        RestockSONum = partNumList[item.Field<string>("PartNumber")].restockSONum,
                         RestockSODate = string.IsNullOrEmpty(partNumList[item.Field<string>("PartNumber")].restockSODate) ? 
                             Convert.ToString((DateTime?)null) : 
                             DateTime.FromOADate(Convert.ToDouble(partNumList[item.Field<string>("PartNumber")].restockSODate)).ToShortDateString()
@@ -43,7 +42,6 @@ namespace InventoryManagementApp.Model
                         MaxStockRev = (int)((itemGroup.Average(so => so.Field<decimal>("SalePrice")) * (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 3m / 15m))) > 1000 ?
                             String.Format("{0:C}", (int)((itemGroup.Average(so => so.Field<decimal>("SalePrice")) * (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 3m / 15m)))) :
                             String.Format("{0:C}", (int)((1000m / itemGroup.Average(so => so.Field<decimal>("SalePrice"))) * (itemGroup.Average(so => so.Field<decimal>("SalePrice"))))),
-                        RestockSONum = itemGroup.Key.QtyOnHand >= (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 1.5m / 15.0m) ? "" : itemGroup.Key.RestockSONum,
                         RestockSODate = itemGroup.Key.QtyOnHand >= (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 1.5m / 15.0m) ? "" : itemGroup.Key.RestockSODate
                     };
 
@@ -61,7 +59,7 @@ namespace InventoryManagementApp.Model
             {
                 IEnumerable<DataRow> minMaxRows =
                     from item in minMaxDt.AsEnumerable()
-                    where (item.Field<int>("QtyOnHand") < item.Field<int>("Min")) && string.IsNullOrEmpty(item.Field<string>("RestockSONum"))
+                    where (item.Field<int>("QtyOnHand") < item.Field<int>("Min")) && string.IsNullOrEmpty(item.Field<string>("RestockSODate"))
                     orderby item["Row"] ascending
                     select item;
 
@@ -80,7 +78,7 @@ namespace InventoryManagementApp.Model
             {
                 IEnumerable<DataRow> minMaxRows =
                     from item in minMaxDt.AsEnumerable()
-                    where (item.Field<int>("QtyOnHand") < item.Field<int>("Min")) && !string.IsNullOrEmpty(item.Field<string>("RestockSONum"))
+                    where (item.Field<int>("QtyOnHand") < item.Field<int>("Min")) && !string.IsNullOrEmpty(item.Field<string>("RestockSODate"))
                     orderby item["Row"] ascending
                     select item;
 
