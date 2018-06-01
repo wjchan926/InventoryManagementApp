@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Data;
+using System.Collections;
 
 namespace InventoryManagementApp.Model
 {
@@ -55,11 +56,13 @@ namespace InventoryManagementApp.Model
         {
             DataTable dt = new DataTable();
 
+            bool isDuringQuarterlyRush = IsDuringQuarterlyRush();
+
             try
             {
                 IEnumerable<DataRow> minMaxRows =
                     from item in minMaxDt.AsEnumerable()
-                    where (item.Field<int>("QtyOnHand") < item.Field<int>("Min")) && string.IsNullOrEmpty(item.Field<string>("RestockSODate"))
+                    where (item.Field<int>("QtyOnHand") < item.Field<int>("Min") || (isDuringQuarterlyRush ? item.Field<int>("QtyOnHand") <= item.Field<int>("Min") * 1.1 : false)) && string.IsNullOrEmpty(item.Field<string>("RestockSODate"))
                     orderby item["Row"] ascending
                     select item;
 
@@ -88,6 +91,44 @@ namespace InventoryManagementApp.Model
             catch { }
 
             return dt;
+        }
+
+        private static bool IsDuringQuarterlyRush()
+        {
+            
+            DateTime currentDate = new DateTime(2018, DateTime.Today.Month, DateTime.Today.Day);
+            System.Diagnostics.Debug.WriteLine(currentDate.ToString());
+                                    
+            List<DateRange> dateRanges = new List<DateRange>()
+            {
+                new DateRange(new DateTime(2018, 2, 20), new DateTime(2018, 3, 31)),
+                new DateRange(new DateTime(2018, 5, 20), new DateTime(2018, 6, 30)),
+                new DateRange(new DateTime(2018, 8, 20), new DateTime(2018, 9, 30)),
+                new DateRange(new DateTime(2018, 11, 20), new DateTime(2018, 12, 31))
+            };
+
+            foreach(DateRange dateRange in dateRanges)
+            {
+                if (currentDate >= dateRange.startDate && currentDate <= dateRange.endDate)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+            
+        }
+
+        class DateRange
+        {
+            public DateTime startDate;
+            public DateTime endDate;
+
+            public DateRange(DateTime startDate, DateTime endDate)
+            {
+                this.startDate = startDate;
+                this.endDate = endDate;
+            }
         }
 
         public static void Write(this DataTable dataTable, string filepath)
