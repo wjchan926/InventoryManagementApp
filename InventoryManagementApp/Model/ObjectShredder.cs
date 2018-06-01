@@ -8,6 +8,10 @@ using System.Threading.Tasks;
 
 namespace InventoryManagementApp.Model
 {
+    /// <summary>
+    /// Required for the CustomLINQtoDataSetMethods.  Do not alter.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class ObjectShredder<T>
     {
         private System.Reflection.FieldInfo[] _fi;

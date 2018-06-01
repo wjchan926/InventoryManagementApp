@@ -8,9 +8,13 @@ using System.Runtime.InteropServices;
 using System.Collections;
 using System.Diagnostics;
 using System.Data;
+using System.IO;
 
 namespace InventoryManagementApp.Model
 {
+    /// <summary>
+    /// Represents all of the Excel Min-Max Document COM Objects.  Implements the IDisposable interface.
+    /// </summary>
     class ExcelDoc : IDisposable
     {
         Excel.Application myApp;
@@ -35,16 +39,15 @@ namespace InventoryManagementApp.Model
         }
 
         /// <summary>
-        /// Opens the MinMax Document
+        /// Opens the MinMax Document.
         /// </summary>
         public void Open()
         {
-
             try
             {
                 if (Process.GetProcessesByName("EXCEL").Count() > 0)
                 {
-                    // Creates a new instance of excel
+                    // Try to get an open instance of Excel.
                     try
                     {
                         myApp = (Excel.Application)Marshal.GetActiveObject("Excel.Application");
@@ -59,6 +62,7 @@ namespace InventoryManagementApp.Model
                 {
                     try
                     {
+                        // Try to Create new instance of Excel.
                         myApp = new Excel.Application();
                         Log.WriteLine("New Instance of Excel Created.");
                     }
@@ -77,9 +81,9 @@ namespace InventoryManagementApp.Model
                 mySheet = myBook.Sheets["Marlin Steel"];
                 setRange();
 
+                // All excel objects are referenced
                 excelObjSet = true;
-
-                // SetExcelObjects();
+                
                 Log.WriteLine("Min-Max Document Opened.");
             }
             catch
@@ -89,11 +93,11 @@ namespace InventoryManagementApp.Model
         }
         
         /// <summary>
-        /// Sets the excel objects
+        /// Sets the excel objects to their corresponding COM objects.
         /// </summary>
         public void SetExcelObjects()
         {
-            // Sets workbook to path specified                  
+            // Sets workbook to path specified    .              
             try
             {
                 myApp = (Excel.Application)Marshal.GetActiveObject("Excel.Application");
@@ -118,7 +122,7 @@ namespace InventoryManagementApp.Model
         }
 
         /// <summary>
-        /// Sets the range of of jobs to analyze with current selection
+        /// Sets the range of of jobs to the entire list of jobs.
         /// </summary>
         private void setRange()
         {
@@ -135,8 +139,8 @@ namespace InventoryManagementApp.Model
         }
         
         /// <summary>
-        /// Closes workbook and applicaiton.  Releases Objects
-        /// Called with the Save and Close GUI Method
+        /// Closes workbook and applicaiton.  Releases Objects.
+        /// Called with the Save and Close GUI Method.
         /// </summary>
         public void Close()
         {
@@ -158,7 +162,7 @@ namespace InventoryManagementApp.Model
         }
                          
         /// <summary>
-        /// Gets all the part numbers from the excel spreasheet
+        /// Gets all the part numbers from the excel spreasheet and stores them in partNumList.
         /// </summary>
         public void InStreamData()
         {
@@ -183,12 +187,15 @@ namespace InventoryManagementApp.Model
             }
         }
 
-        public void Write(object writeOb)
-        {
-            DataTable minMaxDt = (DataTable)writeOb;
-            
+        /// <summary>
+        /// Writes the Min-Max DataTable to the Excel Min-Max Document.
+        /// </summary>
+        /// <param name="writeOb">DatTable to write to the Excel Min-Max Document</param>
+        public void Write(DataTable minMaxDt)
+        {            
             foreach (DataRow row in minMaxDt.Rows)
-            {                
+            {
+                myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.partNumber].Formula = HyperlinkPartNumber(row["PartNumber"].ToString());
                 myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.min] = row["Min"];
                 myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.max] = row["Max"];
                 myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.onHand] = row["QtyOnHand"];
@@ -201,7 +208,40 @@ namespace InventoryManagementApp.Model
 
             Log.WriteLine("Analysis Complete.");
         }   
-        
+
+        /// <summary>
+        /// Hyperlinks the part number to the Release Document.  May not work if Release is named slightly different.
+        /// </summary>
+        /// <param name="partNumber">Part Number that corresponds to a Release Document</param>
+        /// <returns>A string representing a forumla hyperlinking the part number to it's corresponding Release Document.  
+        /// If it cannot be found, a string of the part nubmer is returned instead.</returns>
+        private string HyperlinkPartNumber(string partNumber)
+        {
+            StringBuilder hyperlinkPartNumber = new StringBuilder();
+
+            // Format the part number first
+            // Cut off prefix
+            // Cut off suffix
+            int firstHyphen = partNumber.IndexOf('-');
+            int lastHyphen = partNumber.LastIndexOf('-');
+
+            StringBuilder formattedPartNumber = new StringBuilder((firstHyphen == lastHyphen ? partNumber.Substring(0, lastHyphen) : partNumber.Substring(firstHyphen+1, lastHyphen-firstHyphen-1)));
+            
+            if (partNumber.Length <= 10)
+            {
+                formattedPartNumber.Insert(0, "M");
+            }
+
+            return File.Exists(@"\\MSW-FP1\Factory\RELEASED DESIGNS\" + formattedPartNumber + ".pdf") ? 
+                hyperlinkPartNumber.Append(@"=HYPERLINK(""\\MSW-FP1\Factory\RELEASED DESIGNS\" + formattedPartNumber + @".pdf"",""" + partNumber + @""")").ToString() :
+                    hyperlinkPartNumber.Append(partNumber).ToString();
+
+        }
+
+        /// <summary>
+        /// Writes the Sales Order Restock Date to Excel from the soReqDataTable View Model.
+        /// </summary>
+        /// <param name="soReqDataTable">DataTable that represents which part numbers need Restock Sales Orders</param>
         public void UpdateSO(DataTable soReqDataTable)
         {
             try
@@ -219,6 +259,10 @@ namespace InventoryManagementApp.Model
   
         }
 
+
+        /// <summary>
+        /// Releases all COM objects used in by the Excel document.  Required for the IDisposable interface.
+        /// </summary>
         public void Dispose()
         {
             try
@@ -245,6 +289,9 @@ namespace InventoryManagementApp.Model
 
     }
 
+    /// <summary>
+    /// Helper class to group data stored in partNumList.
+    /// </summary>
     class ExcelPartNumber
     {
         public int rowNum;

@@ -10,6 +10,9 @@ using InventoryManagementApp.Model;
 
 namespace InventoryManagementApp.ViewModel
 {
+    /// <summary>
+    /// Data binds the soReqDataTable to the soReqDataTableView on GUI
+    /// </summary>
     sealed class SOReqViewModel : INotifyPropertyChanged
     {
         private DataTable soReqDataTable;

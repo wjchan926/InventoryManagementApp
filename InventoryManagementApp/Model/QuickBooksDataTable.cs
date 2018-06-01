@@ -8,19 +8,27 @@ using System.Data.Odbc;
 
 namespace InventoryManagementApp.Model
 {
+    /// <summary>
+    /// An abstract super class that represents a DataTable from QuickBooks.
+    /// </summary>
     abstract class QuickBooksDataTable : DataTable, IQuickBooksData
     {
         protected abstract string sqlCmdStr { get; }
-              
+        
+        /// <summary>
+        /// Builds the DataTable from the QuickBooks Database.
+        /// </summary>                      
         public void BuildTable()
         {
             QueryQB(sqlCmdStr);
         }
 
+        /// <summary>
+        /// Queries the data from the QuickBooks Database.
+        /// </summary>
+        /// <param name="sqlCmdStr">SQL String used for querying data</param>
         protected void QueryQB(string sqlCmdStr)
-        {
-            //         ConsoleWriter.WriteLine("Accessing QuickBooks Database.");
-
+        {    
             try
             {
                 using (OdbcConnection con = new OdbcConnection("Dsn=QuickBooks Data"))
@@ -34,7 +42,6 @@ namespace InventoryManagementApp.Model
                         try
                         {
                             dAdapter.Fill(this);
-                            //                    ConsoleWriter.WriteLine("Data Table Filled.");
                         }
                         catch (OdbcException sqlError)
                         {
@@ -42,7 +49,7 @@ namespace InventoryManagementApp.Model
                         }
                         catch (Exception)
                         {
-                            //                    ConsoleWriter.WriteLine("Data Table Filled Failed.");
+                            Console.WriteLine("Data Table Filled Failed.");
                         }
                     }
                 }
@@ -54,6 +61,11 @@ namespace InventoryManagementApp.Model
              
         }
 
+        /// <summary>
+        /// Error handler if the returned data cannot be converted by .NET from SQL.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
         protected abstract void FillError(object sender, FillErrorEventArgs args);     
     }
 }

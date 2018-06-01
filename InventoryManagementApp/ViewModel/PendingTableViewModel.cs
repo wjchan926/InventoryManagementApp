@@ -9,6 +9,9 @@ using InventoryManagementApp.Model;
 
 namespace InventoryManagementApp.ViewModel
 {
+    /// <summary>
+    /// Data binds the pendingDataTable to the pendingDataTableView on GUI.
+    /// </summary>
     class PendingTableViewModel : INotifyPropertyChanged
     {
         private DataTable pendingDataTable;

@@ -8,8 +8,14 @@ using System.Data.Odbc;
 
 namespace InventoryManagementApp.Model
 {
+    /// <summary>
+    /// Represents the ItemAssembyly DataTable from QuickBooks
+    /// </summary>
     sealed class ItemDataTable : QuickBooksDataTable, IQuickBooksData
     {               
+        /// <summary>
+        /// SQL string property.
+        /// </summary>
         protected override string sqlCmdStr
         {
             get
@@ -19,6 +25,11 @@ namespace InventoryManagementApp.Model
             }
         }
                 
+        /// <summary>
+        /// Error handler if the returned data cannot be converted by .NET from SQL
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
         protected override sealed void FillError(object sender, FillErrorEventArgs args)
         {
             // Code to handle precision loss.  

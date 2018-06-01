@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace InventoryManagementApp.Model
 {
     /// <summary>
-    /// Struct that represents the mapping of the columns in Excel Inventory Management Doc
+    /// Class that represents the mapping of the columns in Excel Inventory Min-Max Management Doc.
     /// </summary>
     public static class ExcelColumn
     {

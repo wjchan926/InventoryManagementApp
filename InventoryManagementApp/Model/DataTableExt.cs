@@ -8,8 +8,19 @@ using System.Collections;
 
 namespace InventoryManagementApp.Model
 {
+    /// <summary>
+    /// Contains all DataTable extension methods.
+    /// </summary>
     static class DataTableExt
     {
+        /// <summary>
+        /// Builds the MinMax DataTable.  This DataTable Holds all the information that will be written into the Min-Max document.
+        /// </summary>
+        /// <param name="minMaxDt">Current DataTable where information queried from QB will be stored.</param>
+        /// <param name="salesOrderDataTable">DataTable that contains Sales Orders information from QB.</param>
+        /// <param name="itemDataTable">DataTable that contains ItemAssembly information from QB.</param>
+        /// <param name="partNumList">Part Numbers from the Min-Max document for querying.</param>
+        /// <returns>A DataTable that represents the Min-Max Data to be written onto the Min-Max Document.</returns>
         public static DataTable BuildTable(this DataTable minMaxDt, IQuickBooksData salesOrderDataTable, IQuickBooksData itemDataTable, Dictionary<string, ExcelPartNumber> partNumList)
         {
             DataTable dt = new DataTable();
@@ -52,6 +63,12 @@ namespace InventoryManagementApp.Model
             return dt;
         }
 
+        /// <summary>
+        /// Builds the DataTable that shows which parts need Restock Sales Orders made.  Uses the MinMax DataTable.
+        /// </summary>
+        /// <param name="soReqTable">Current DataTable where information will be stored.</param>
+        /// <param name="minMaxDt">Min-Max DataTable.</param>
+        /// <returns>A DataTable of Part Numbers where Restock Sales Orders need to be made.</returns>
         public static DataTable BuildSOReqTable(this DataTable soReqTable, DataTable minMaxDt)
         {
             DataTable dt = new DataTable();
@@ -74,6 +91,12 @@ namespace InventoryManagementApp.Model
             return dt;
         }
 
+        /// <summary>
+        /// Builds the Datatable that shows which parts have a Restock Sales Order made and are just waiting to be built.  USes the Min-Max DataTable.
+        /// </summary>
+        /// <param name="pendingDt">Current DataTable where information will be stored.</param>
+        /// <param name="minMaxDt">Min-Max DataTable.</param>
+        /// <returns>A DataTable where the parts are waiting to be built.</returns>
         public static DataTable BuildPending(this DataTable pendingDt, DataTable minMaxDt)
         {
             DataTable dt = new DataTable();         
@@ -93,9 +116,13 @@ namespace InventoryManagementApp.Model
             return dt;
         }
 
+        /// <summary>
+        /// Helper method used to determine if the current date falls within 45 days of a quarter end.
+        /// </summary>
+        /// <returns>True if the date is within 45 days of an EOQ, False otherwise.</returns>
         private static bool IsDuringQuarterlyRush()
         {
-            
+            // Year does not matter, 2018 is only used because DateTime constructor requires a date.
             DateTime currentDate = new DateTime(2018, DateTime.Today.Month, DateTime.Today.Day);
             System.Diagnostics.Debug.WriteLine(currentDate.ToString());
                                     
@@ -115,10 +142,12 @@ namespace InventoryManagementApp.Model
                 }
             }
 
-            return false;
-            
+            return false;            
         }
 
+        /// <summary>
+        /// Helper Class for the IsDuringQuarterlyRush method.
+        /// </summary>
         class DateRange
         {
             public DateTime startDate;
@@ -131,6 +160,11 @@ namespace InventoryManagementApp.Model
             }
         }
 
+        /// <summary>
+        /// Writes a DataTable to a CSV file at the specified location.  This method is used for testing only.
+        /// </summary>
+        /// <param name="dataTable">DataTable to be written to a CSV file.</param>
+        /// <param name="filepath">Location of CSV file.</param>
         public static void Write(this DataTable dataTable, string filepath)
         {
             // Read table, while there is still a record

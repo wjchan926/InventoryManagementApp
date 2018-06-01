@@ -8,6 +8,9 @@ using InventoryManagementApp.Model;
 
 namespace InventoryManagementApp.ViewModel
 {
+    /// <summary>
+    /// Ensures that any classes that implenent this interface must have similar behaviors to an Excel Document.
+    /// </summary>
     interface IExcelViewModel
     {        
         void Open();

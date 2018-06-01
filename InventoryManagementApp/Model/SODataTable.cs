@@ -9,8 +9,14 @@ using System.Collections;
 
 namespace InventoryManagementApp.Model
 {
+    /// <summary>
+    /// Represents the SalesOrderLine DataTable from QuickBooks
+    /// </summary>
     sealed class SODataTable : QuickBooksDataTable, IQuickBooksData
-    {       
+    {
+        /// <summary>
+        /// SQL string property.
+        /// </summary>
         protected override string sqlCmdStr
         {
             get
@@ -20,7 +26,12 @@ namespace InventoryManagementApp.Model
                            "WHERE (SalesOrderLine.SalesOrderLineItemRefFullName IS NOT NULL) AND (SalesOrderLine.ShipDate IS NOT NULL) AND (SalesOrderLine.SalesOrderLineQuantity IS NOT NULL) AND (SalesOrderLine.SalesOrderLineRate > 0)";
             }
         }
-        
+
+        /// <summary>
+        /// Error handler if the returned data cannot be converted by .NET from SQL.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
         protected override sealed void FillError(object sender, FillErrorEventArgs args)
         {
             // Code to handle precision loss.  

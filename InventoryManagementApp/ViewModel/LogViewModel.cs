@@ -10,15 +10,17 @@ using InventoryManagementApp.Model;
 
 namespace InventoryManagementApp.ViewModel
 {
+    /// <summary>
+    /// Binds the Log Class to the Status Panel on GUI.  Implmements the INotifyPropertChanged.
+    /// </summary>
     sealed class LogViewModel : INotifyPropertyChanged
-    {
-        // private static string output;
-
+    {        
         public LogViewModel()
         {
             Log.WriteLine("Inventory Management Tool Started.\nPlease ensure QuickBooks is open and logged in.");
             OnPropertyChanged("Output");
         }
+
 
         public string Output
         {
@@ -28,7 +30,6 @@ namespace InventoryManagementApp.ViewModel
             }
             private set
             {
-    //            Log.WriteLine(value);
                 OnPropertyChanged("Output");
             }
         }
