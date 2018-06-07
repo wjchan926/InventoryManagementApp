@@ -36,8 +36,9 @@ namespace InventoryManagementApp.Model
                         Row = partNumList[item.Field<string>("PartNumber")].rowNum,
                         PartNumber = item.Field<string>("PartNumber"),
                         QtyOnHand = (int)item.Field<decimal>("QtyOnHand"),
-                        RestockSODate = string.IsNullOrEmpty(partNumList[item.Field<string>("PartNumber")].restockSODate) ? 
-                            Convert.ToString((DateTime?)null) : 
+                        BracketsPerSheet = partNumList[item.Field<string>("PartNumber")].bracketsPerSheet,
+                        RestockSODate = string.IsNullOrEmpty(partNumList[item.Field<string>("PartNumber")].restockSODate) ?
+                            Convert.ToString((DateTime?)null) :
                             DateTime.FromOADate(Convert.ToDouble(partNumList[item.Field<string>("PartNumber")].restockSODate)).ToShortDateString()
                     } into itemGroup
                     select new
@@ -45,15 +46,22 @@ namespace InventoryManagementApp.Model
                         Row = itemGroup.Key.Row + 1,
                         PartNumber = itemGroup.Key.PartNumber,
                         Min = (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 1.5m / 15.0m),
-                        Max = (int)((itemGroup.Average(so => so.Field<decimal>("SalePrice")) * (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 3m / 15m))) > 1000 ?
-                            (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 3m / 15m) :
-                            (int)(1000m / itemGroup.Average(so => so.Field<decimal>("SalePrice"))),
+                        //Max = (int)((itemGroup.Average(so => so.Field<decimal>("SalePrice")) * (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 3m / 15m))) > 1000 ?
+                        //    (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 3m / 15m) :
+                        //    (int)(1000m / itemGroup.Average(so => so.Field<decimal>("SalePrice"))),
+
+                        Max = itemGroup.Key.BracketsPerSheet != 0 ?
+                            itemGroup.Key.BracketsPerSheet * 
+                               (int)Math.Ceiling(Convert.ToDecimal(CalcMax(itemGroup.Sum(so => so.Field<decimal>("Quantity")), itemGroup.Average(so => so.Field<decimal>("SalePrice"))) / Convert.ToDecimal(itemGroup.Key.BracketsPerSheet))) :
+                            CalcMax(itemGroup.Sum(so => so.Field<decimal>("Quantity")), itemGroup.Average(so => so.Field<decimal>("SalePrice"))),
+
                         QtyOnHand = itemGroup.Key.QtyOnHand,
                         AvgSalePrice = String.Format("{0:C}", itemGroup.Average(so => so.Field<decimal>("SalePrice"))),
                         Last15Months = (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity"))),
-                        MaxStockRev = (int)(Math.Ceiling((itemGroup.Average(so => so.Field<decimal>("SalePrice")) * (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 3m / 15m)))) > 1000 ?
-                            String.Format("{0:C}", (int)((itemGroup.Average(so => so.Field<decimal>("SalePrice")) * (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 3m / 15m)))) :
-                            String.Format("{0:C}", (int)((1000m / itemGroup.Average(so => so.Field<decimal>("SalePrice"))) * (itemGroup.Average(so => so.Field<decimal>("SalePrice"))))),
+                        MaxStockRev = String.Format("{0:C}", CalcMax(itemGroup.Sum(so => so.Field<decimal>("Quantity")), itemGroup.Average(so => so.Field<decimal>("SalePrice"))) * itemGroup.Average(so => so.Field<decimal>("SalePrice"))),
+                        //MaxStockRev = (int)(Math.Ceiling((itemGroup.Average(so => so.Field<decimal>("SalePrice")) * (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 3m / 15m)))) > 1000 ?
+                        //    String.Format("{0:C}", (int)((itemGroup.Average(so => so.Field<decimal>("SalePrice")) * (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 3m / 15m)))) :
+                        //    String.Format("{0:C}", (int)((1000m / itemGroup.Average(so => so.Field<decimal>("SalePrice"))) * (itemGroup.Average(so => so.Field<decimal>("SalePrice"))))),
                         //  RestockSODate = itemGroup.Key.QtyOnHand >= (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 1.5m / 15.0m) ? "" : itemGroup.Key.RestockSODate
                         RestockSODate = itemGroup.Key.RestockSODate
                     };
@@ -63,6 +71,18 @@ namespace InventoryManagementApp.Model
 
             return dt;
         }
+
+        /// <summary>
+        /// Calculates the Max limit based on the $1000 rule.
+        /// </summary>
+        /// <param name="quantity">Total Quantity sold in 15 months</param>
+        /// <param name="salePrice">Average sale price</param>
+        /// <returns>A Max limit as an int</returns>
+        private static int CalcMax(decimal quantity, decimal salePrice)
+        {
+            return (int)Math.Ceiling((salePrice * quantity * 3m / 15m) > 1000m ? (quantity * 3m / 15m) : (1000m / salePrice));
+        }
+               
 
         /// <summary>
         /// Builds the DataTable that shows which parts need Restock Sales Orders made.  Uses the MinMax DataTable.
