@@ -34,7 +34,7 @@ namespace InventoryManagementApp
 
             foreach(KeyValuePair<string,ExcelPartNumber> kvp in excelDoc.partNumList)
             {
-                sb.AppendLine(kvp.Key + " " + kvp.Value);
+                sb.AppendLine(kvp.Key + " " + kvp.Value.restockSODate + " " + kvp.Value.bracketsPerSheet);
             }
 
             System.IO.File.WriteAllText(@"\\msw-fp1\user$\wchan\Documents\Visual Studio 2015\Projects\InventoryManagementApp\InventoryManagementApp\bin\Debug\Test\Part Numbers.txt", sb.ToString());

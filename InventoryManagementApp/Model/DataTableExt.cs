@@ -51,10 +51,11 @@ namespace InventoryManagementApp.Model
                         QtyOnHand = itemGroup.Key.QtyOnHand,
                         AvgSalePrice = String.Format("{0:C}", itemGroup.Average(so => so.Field<decimal>("SalePrice"))),
                         Last15Months = (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity"))),
-                        MaxStockRev = (int)((itemGroup.Average(so => so.Field<decimal>("SalePrice")) * (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 3m / 15m))) > 1000 ?
+                        MaxStockRev = (int)(Math.Ceiling((itemGroup.Average(so => so.Field<decimal>("SalePrice")) * (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 3m / 15m)))) > 1000 ?
                             String.Format("{0:C}", (int)((itemGroup.Average(so => so.Field<decimal>("SalePrice")) * (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 3m / 15m)))) :
                             String.Format("{0:C}", (int)((1000m / itemGroup.Average(so => so.Field<decimal>("SalePrice"))) * (itemGroup.Average(so => so.Field<decimal>("SalePrice"))))),
-                        RestockSODate = itemGroup.Key.QtyOnHand >= (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 1.5m / 15.0m) ? "" : itemGroup.Key.RestockSODate
+                        //  RestockSODate = itemGroup.Key.QtyOnHand >= (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 1.5m / 15.0m) ? "" : itemGroup.Key.RestockSODate
+                        RestockSODate = itemGroup.Key.RestockSODate
                     };
 
             dt = minMaxGroup.CustomCopyToDataTable();
@@ -104,7 +105,7 @@ namespace InventoryManagementApp.Model
             {
                 IEnumerable<DataRow> minMaxRows =
                     from item in minMaxDt.AsEnumerable()
-                    where (item.Field<int>("QtyOnHand") < item.Field<int>("Min")) && !string.IsNullOrEmpty(item.Field<string>("RestockSODate"))
+                    where (item.Field<int>("QtyOnHand") <= item.Field<int>("Min")) && !string.IsNullOrEmpty(item.Field<string>("RestockSODate"))
                     orderby item["Row"] ascending
                     select item;
 

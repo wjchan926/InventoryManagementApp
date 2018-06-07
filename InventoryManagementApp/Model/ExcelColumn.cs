@@ -18,6 +18,7 @@ namespace InventoryManagementApp.Model
         public readonly static string avgSalePrice = "E";
         public readonly static string quantitySold = "F";
         public readonly static string maxStockRev = "G";
-        public readonly static string restockSODate = "h";
+        public readonly static string restockSODate = "H";
+        public readonly static string bracketsPerSheet = "I";
     }
 }

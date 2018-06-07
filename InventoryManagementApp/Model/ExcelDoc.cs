@@ -73,7 +73,7 @@ namespace InventoryManagementApp.Model
                 }
 
                 myApp.Visible = true;            // True to see new instance, false to hide
-                myApp.DisplayAlerts = false;            // Hide alerts
+
 
                 // Set the objects to corresponding excel objects
                 myBooks = myApp.Workbooks;
@@ -146,13 +146,14 @@ namespace InventoryManagementApp.Model
         {
             try
             {
+                myApp.DisplayAlerts = false;            // Hide alerts
                 SetExcelObjects();
                 myBook.Close(true, Type.Missing, Type.Missing);
                 myBooks.Close();
                 myApp.Quit();
                 myApp.DisplayAlerts = true;
                 Dispose();
-                Log.WriteLine("Min-Max Document Saved and Closed.");
+                Log.WriteLine("Min-Max Document Saved and Closed.");    
             }
             catch (Exception e)
             {
@@ -177,7 +178,9 @@ namespace InventoryManagementApp.Model
                     //     partNumList.Add(convertedPartNumber, row.Row);
                     dynamic soDateVal = myRange[row.Row - 1, ExcelColumn.restockSODate].Value2;
                     string conSoDateVal = Convert.ToString(soDateVal);
-                    partNumList.Add(convertedPartNumber, new ExcelPartNumber(row.Row - 1, conSoDateVal));
+                    object bracketVal = myRange[row.Row - 1, ExcelColumn.bracketsPerSheet].Value2;
+                    int convertedBracketPerSheet = Convert.ToInt32(bracketVal);
+                    partNumList.Add(convertedPartNumber, new ExcelPartNumber(row.Row - 1, conSoDateVal, convertedBracketPerSheet));
                 }
                 Log.WriteLine(partNumList.Count + " Entries Found.");
             }
@@ -192,7 +195,9 @@ namespace InventoryManagementApp.Model
         /// </summary>
         /// <param name="writeOb">DatTable to write to the Excel Min-Max Document</param>
         public void Write(DataTable minMaxDt)
-        {            
+        {
+            myApp.DisplayAlerts = false;            // Hide alerts
+                
             foreach (DataRow row in minMaxDt.Rows)
             {
                 myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.partNumber].Formula = HyperlinkPartNumber(row["PartNumber"].ToString());
@@ -202,11 +207,13 @@ namespace InventoryManagementApp.Model
                 myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.avgSalePrice] = String.Format("{0:C}", row["AvgSalePrice"]);
                 myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.quantitySold] = row["Last15Months"];
                 myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.maxStockRev] = String.Format("{0:C}", row["MaxStockRev"]);
-                myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.restockSODate] = String.Format("{0:M/d/yyyy}", row["RestockSODate"]);
+                myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.restockSODate] = row["RestockSODate"];
                 Log.WriteLine(row["PartNumber"].ToString() + " Analyzed");
             }
 
             Log.WriteLine("Analysis Complete.");
+
+            myApp.DisplayAlerts = true;
         }   
 
         /// <summary>
@@ -267,6 +274,7 @@ namespace InventoryManagementApp.Model
         {
             try
             {
+                myApp.DisplayAlerts = true;
                 Marshal.ReleaseComObject(myRange);
                 Marshal.ReleaseComObject(mySheet);
                 Marshal.ReleaseComObject(myBook);
@@ -296,11 +304,13 @@ namespace InventoryManagementApp.Model
     {
         public int rowNum;
         public string restockSODate;
+        public int bracketsPerSheet;
 
-        public ExcelPartNumber(int rowNum, string restockSODate)
+        public ExcelPartNumber(int rowNum, string restockSODate, int bracketsPerSheet)
         {
             this.rowNum = rowNum;
             this.restockSODate = restockSODate;
+            this.bracketsPerSheet = bracketsPerSheet;
         }
     }
 
