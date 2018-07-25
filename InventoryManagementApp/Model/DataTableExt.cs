@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Data;
 using System.Collections;
+using System.Windows;
 
 namespace InventoryManagementApp.Model
 {
@@ -13,6 +14,9 @@ namespace InventoryManagementApp.Model
     /// </summary>
     static class DataTableExt
     {
+        // Calculate for last 12 months
+        private static int rollingMonths = 12;
+
         /// <summary>
         /// Builds the MinMax DataTable.  This DataTable Holds all the information that will be written into the Min-Max document.
         /// </summary>
@@ -24,13 +28,13 @@ namespace InventoryManagementApp.Model
         public static DataTable BuildTable(this DataTable minMaxDt, IQuickBooksData salesOrderDataTable, IQuickBooksData itemDataTable, Dictionary<string, ExcelPartNumber> partNumList)
         {
             DataTable dt = new DataTable();
-            DateTime startDate = DateTime.Today.AddMonths(-15); // Rolling 15 months
+            DateTime startDate = DateTime.Today.AddMonths(-rollingMonths); // Rolling 12 months
 
             var minMaxGroup =
                     from item in ((QuickBooksDataTable)itemDataTable).AsEnumerable()
                     join so in ((QuickBooksDataTable)salesOrderDataTable).AsEnumerable()
                     on item.Field<string>("PartNumber") equals so.Field<string>("PartNumber")
-                    where partNumList.Keys.Contains(item.Field<string>("PartNumber")) && so.Field<DateTime>("ShipDate") >= startDate && !so.Field<string>("Customer").Contains("Marlin Ste")
+                    where partNumList.Keys.Contains(item.Field<string>("PartNumber")) && so.Field<DateTime?>("ShipDate") >= startDate && !so.Field<string>("Customer").Contains("Marlin Ste")
                     group so by new
                     {
                         Row = partNumList[item.Field<string>("PartNumber")].rowNum,
@@ -45,7 +49,7 @@ namespace InventoryManagementApp.Model
                     {
                         Row = itemGroup.Key.Row + 1,
                         PartNumber = itemGroup.Key.PartNumber,
-                        Min = (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 1.5m / 15.0m),
+                        Min = (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 1.5m / rollingMonths),
                         //Max = (int)((itemGroup.Average(so => so.Field<decimal>("SalePrice")) * (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 3m / 15m))) > 1000 ?
                         //    (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 3m / 15m) :
                         //    (int)(1000m / itemGroup.Average(so => so.Field<decimal>("SalePrice"))),
@@ -57,7 +61,7 @@ namespace InventoryManagementApp.Model
 
                         QtyOnHand = itemGroup.Key.QtyOnHand,
                         AvgSalePrice = String.Format("{0:C}", itemGroup.Average(so => so.Field<decimal>("SalePrice"))),
-                        Last15Months = (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity"))),
+                        Last12Months = (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity"))),
                         MaxStockRev = String.Format("{0:C}", CalcMax(itemGroup.Sum(so => so.Field<decimal>("Quantity")), itemGroup.Average(so => so.Field<decimal>("SalePrice"))) * itemGroup.Average(so => so.Field<decimal>("SalePrice"))),
                         //MaxStockRev = (int)(Math.Ceiling((itemGroup.Average(so => so.Field<decimal>("SalePrice")) * (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 3m / 15m)))) > 1000 ?
                         //    String.Format("{0:C}", (int)((itemGroup.Average(so => so.Field<decimal>("SalePrice")) * (int)(itemGroup.Sum(so => so.Field<decimal>("Quantity")) * 3m / 15m)))) :
@@ -66,8 +70,18 @@ namespace InventoryManagementApp.Model
                         RestockSODate = itemGroup.Key.RestockSODate
                     };
 
-            dt = minMaxGroup.CustomCopyToDataTable();
-            dt.PrimaryKey = new DataColumn[] { dt.Columns["PartNumber"] };
+
+            try
+            {
+                dt = minMaxGroup.CustomCopyToDataTable();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+                MessageBox.Show(ex.StackTrace);
+            }
+                dt.PrimaryKey = new DataColumn[] { dt.Columns["PartNumber"] };
+           
 
             return dt;
         }
@@ -80,7 +94,7 @@ namespace InventoryManagementApp.Model
         /// <returns>A Max limit as an int</returns>
         private static int CalcMax(decimal quantity, decimal salePrice)
         {
-            return (int)Math.Ceiling((salePrice * quantity * 3m / 15m) > 1000m ? (quantity * 3m / 15m) : (1000m / salePrice));
+            return (int)Math.Ceiling((salePrice * quantity * 3m / rollingMonths) > 1000m ? (quantity * 3m / rollingMonths) : (1000m / salePrice));
         }
                
 

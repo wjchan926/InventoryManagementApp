@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Data;
 using System.Data.Odbc;
 using System.Collections;
+using System.Windows;
 
 namespace InventoryManagementApp.Model
 {
@@ -38,17 +39,19 @@ namespace InventoryManagementApp.Model
             object errorSOQty = 0.0m;
             object errorSalePrice = 0.0m;
             object errorShipDate = DBNull.Value;
+        //    object errorShipDate = Convert.ToString((DateTime?)null);
 
             try
             {
                 errorSOQty = Convert.ToDecimal(args.Values[1]);
                 errorSalePrice = Convert.ToDecimal(args.Values[2]);
                 errorShipDate = DateTime.Parse(args.Values[3].ToString());
+              //  errorShipDate = DateTime.ParseExact(args.Values[3].ToString(),"MM-dd-yyyy",null);
             }
             catch (Exception e)
             {
                 System.Diagnostics.Debug.WriteLine("Cannot convert SO Data.\n" + e.Message);
-                System.Diagnostics.Debug.WriteLine(errorSOQty.ToString() + " " + errorSalePrice.ToString() + " " + errorShipDate.ToString());
+             //   MessageBox.Show(errorSOQty.ToString() + " " + errorSalePrice.ToString() + " " + errorShipDate.ToString());
             }
 
             DataRow myRow = args.DataTable.Rows.Add(new object[]

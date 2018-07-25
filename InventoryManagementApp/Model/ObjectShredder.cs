@@ -159,6 +159,7 @@ namespace InventoryManagementApp.Model
                     DataColumn dc = table.Columns.Contains(f.Name) ? table.Columns[f.Name]
                         : table.Columns.Add(f.Name, f.FieldType);
 
+
                     // Add the field to the ordinal map.
                     _ordinalMap.Add(f.Name, dc.Ordinal);
                 }
@@ -169,8 +170,8 @@ namespace InventoryManagementApp.Model
                 {
                     // Add the property as a column in the table if it doesn't exist
                     // already.
-                    DataColumn dc = table.Columns.Contains(p.Name) ? table.Columns[p.Name]
-                        : table.Columns.Add(p.Name, p.PropertyType);
+             //       DataColumn dc = table.Columns.Contains(p.Name) ? table.Columns[p.Name]: table.Columns.Add(p.Name, p.PropertyType);
+                    DataColumn dc = table.Columns.Contains(p.Name) ? table.Columns[p.Name] : table.Columns.Add(p.Name, Nullable.GetUnderlyingType(p.PropertyType) ?? p.PropertyType);
 
                     // Add the property to the ordinal map.
                     _ordinalMap.Add(p.Name, dc.Ordinal);

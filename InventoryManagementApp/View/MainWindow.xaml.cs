@@ -19,6 +19,7 @@ using System.Runtime.CompilerServices;
 using System.Data;
 using System.Diagnostics;
 using System.Threading;
+using System.Drawing.Printing;
 
 namespace InventoryManagementApp.View
 {
@@ -72,11 +73,20 @@ namespace InventoryManagementApp.View
             // Disable Buttons
             openBtn.IsEnabled = false;
             analyzeBtn.IsEnabled = false;
-            saveCloseBtn.IsEnabled = false;                
+            saveCloseBtn.IsEnabled = false;
 
             // Analyze
-            minMaxDt = excelDocViewModel.Analyze();
+            try 
+            {
 
+                minMaxDt = excelDocViewModel.Analyze();
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+          
             // Update Status Viewer
             logViewModel.Update();
             outputTb.ScrollToEnd();
@@ -128,11 +138,70 @@ namespace InventoryManagementApp.View
         }
 
         private void updateExcelBtn_Click(object sender, RoutedEventArgs e)
-        {            
-            excelDocViewModel.UpdateSO(soReqViewModel.SOReqDataTable); 
+        {
+            try
+            {
+                excelDocViewModel.UpdateSO(soReqViewModel.SOReqDataTable);
+            }
+            catch (Exception)
+            {
+                Log.WriteLine("Nothing to Update.");
+            }
             
             logViewModel.Update();
             outputTb.ScrollToEnd();
+        }
+
+        private void updateStatistics()
+        {
+
+        }
+
+        private void printBtn_Click(object sender, RoutedEventArgs e)
+        {
+            //PrintDialog printDlg = new PrintDialog();
+
+            //bool? result = printDlg.ShowDialog();
+
+            //if (result == true)
+            //{
+            //    Size pageSize = new Size(printDlg.PrintableAreaWidth, printDlg.PrintableAreaHeight);
+            //    DataGrid tempGrid = new DataGrid();
+
+            //    tempGrid.SetBinding(DataGrid.ItemsSourceProperty, new Binding("SOReqDataTable")
+            //    {
+            //        Source = soReqViewModel,
+            //        Mode = BindingMode.TwoWay
+            //    });
+
+            //    tempGrid.Measure(pageSize);
+            //    tempGrid.Arrange(new Rect(5, 5, pageSize.Width, pageSize.Height));
+            //    printDlg.PrintVisual(tempGrid, "SO Required Data Grid Printing.");
+            //}       
+
+        }
+
+        private void printPendingBtn_Click(object sender, RoutedEventArgs e)
+        {
+            //PrintDialog printDlg = new PrintDialog();
+
+            //bool? result = printDlg.ShowDialog();
+
+            //if (result == true)
+            //{
+            //    Size pageSize = new Size(printDlg.PrintableAreaWidth, printDlg.PrintableAreaHeight);
+            //    DataGrid tempGrid = new DataGrid();
+
+            //    tempGrid.SetBinding(DataGrid.ItemsSourceProperty, new Binding("PendingDataTable")
+            //    {
+            //        Source = pendingTableViewModel,
+            //        Mode = BindingMode.OneWay
+            //    });
+
+            //    tempGrid.Measure(pageSize);
+            //    tempGrid.Arrange(new Rect(5, 5, pageSize.Width, pageSize.Height));
+            //    printDlg.PrintVisual(tempGrid, "Pending Build Printing.");
+            //}
         }
     }
 }

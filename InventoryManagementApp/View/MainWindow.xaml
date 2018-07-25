@@ -25,8 +25,8 @@
             <Button x:Name="exitBtn" Content="Exit Inventory Management Tool" Margin="10,5,10,5" VerticalAlignment="Top" Grid.Column="1" Grid.Row="1" Click="exitBtn_Click"/>
         </StackPanel>
         <Label x:Name="label" Content="Status:" Grid.Column="1" HorizontalAlignment="Left" Margin="265,62,0,0" Grid.Row="1" VerticalAlignment="Top" FontSize="20"/>
-        <Button x:Name="clearBtn" Content="Clear" Grid.Column="1" Margin="0,72,20,0" Grid.Row="1" VerticalAlignment="Top" Click="clearBtn_Click" HorizontalAlignment="Right" Width="71"/>
-        <Border BorderBrush="Black" BorderThickness="1" Grid.Column="1" Height="137" Margin="265,99,20,0" Grid.Row="1" VerticalAlignment="Top">
+        <Button x:Name="clearBtn" Content="Clear" Grid.Column="1" Margin="844,68,559,0" Grid.Row="1" VerticalAlignment="Top" Click="clearBtn_Click"/>
+        <Border BorderBrush="Black" BorderThickness="1" Grid.Column="1" Height="137" Margin="265,99,0,0" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Left" Width="650">
             <TextBox x:Name="outputTb" TextWrapping="Wrap" IsReadOnly="True" VerticalScrollBarVisibility="Visible" />
         </Border>
         <DataGrid x:Name="soReqDataGrid" Grid.Column="1" Margin="10,296,0,20" Grid.Row="1" SelectionMode="Single" SelectionUnit="Cell" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserSortColumns="False" CanUserResizeRows="False" HorizontalAlignment="Left" Width="700"/>
@@ -34,6 +34,14 @@
         <Button x:Name="updateExcelBtn" Content="Update Min-Max Doc" Grid.Column="1" HorizontalAlignment="Right" Margin="0,265,764,0" Grid.Row="1" VerticalAlignment="Top" Width="130" Click="updateExcelBtn_Click"/>
         <Label x:Name="label3" Content="Pending Build:" FontSize="20" Grid.Column="1" HorizontalAlignment="Left" Margin="754,254,0,0" Grid.Row="1" VerticalAlignment="Top"/>
         <DataGrid x:Name="pendingDataGrid" Margin="754,296,20,20" Grid.Row="1" IsReadOnly="True" CanUserResizeColumns="False" CanUserReorderColumns="False" CanUserResizeRows="False" CanUserSortColumns="False" Grid.Column="1"/>
-        <Button x:Name="printBtn" Content="Print SO Required" Grid.Column="1" HorizontalAlignment="Left" Margin="140,265,0,0" Grid.Row="1" VerticalAlignment="Top" Width="110"/>
+        <Button x:Name="printBtn" Content="Print SO Required" Grid.Column="1" HorizontalAlignment="Left" Margin="140,265,0,0" Grid.Row="1" VerticalAlignment="Top" Width="110" Click="printBtn_Click"/>
+        <StackPanel Grid.Column="1" HorizontalAlignment="Left" Height="174" Margin="942,62,0,0" Grid.Row="1" VerticalAlignment="Top" Width="512">
+            <Label x:Name="label4" Content="Min-Max Statistics:" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="20"/>
+            <Separator Height="10" Margin="0"/>
+            <Label x:Name="maxRevLabel" Content="Max Stocking Revenue: "/>
+            <Label x:Name="minRevLabel" Content="Min Stocking Revenue: "/>
+            <Label x:Name="pendingBuildLabel" Content="Pending Build Revenue: "/>
+        </StackPanel>
+        <Button x:Name="printPendingBtn" Content="Print Pending Build" Grid.Column="1" HorizontalAlignment="Left" Margin="896,265,0,0" Grid.Row="1" VerticalAlignment="Top" Width="135" Click="printPendingBtn_Click"/>
     </Grid>
 </Window>
