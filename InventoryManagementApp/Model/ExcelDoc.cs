@@ -15,7 +15,7 @@ namespace InventoryManagementApp.Model
     /// <summary>
     /// Represents all of the Excel Min-Max Document COM Objects.  Implements the IDisposable interface.
     /// </summary>
-    class ExcelDoc : IDisposable
+    public class ExcelDoc : IDisposable
     {
         Excel.Application myApp;
         Excel.Workbook myBook;
@@ -300,7 +300,7 @@ namespace InventoryManagementApp.Model
     /// <summary>
     /// Helper class to group data stored in partNumList.
     /// </summary>
-    class ExcelPartNumber
+   public class ExcelPartNumber
     {
         public int rowNum;
         public string restockSODate;
