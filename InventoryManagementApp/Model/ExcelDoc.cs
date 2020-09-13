@@ -205,7 +205,7 @@ namespace InventoryManagementApp.Model
                 myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.max] = row["Max"];
                 myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.onHand] = row["QtyOnHand"];
                 myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.avgSalePrice] = String.Format("{0:C}", row["AvgSalePrice"]);
-                myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.quantitySold] = row["Last15Months"];
+                myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.quantitySold] = row["Last12Months"];
                 myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.maxStockRev] = String.Format("{0:C}", row["MaxStockRev"]);
                 myRange[partNumList[row["PartNumber"].ToString()].rowNum, ExcelColumn.restockSODate] = row["RestockSODate"];
                 Log.WriteLine(row["PartNumber"].ToString() + " Analyzed");
